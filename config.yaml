@@ -8,3 +8,9 @@ training:
   optimizer: Adam
   loss: L1loss
   shuffle: True
+
+path:
+  train: data/train.csv
+  dev: data/dev.csv
+  test: data/dev.csv
+  predict: data/predict.csv
