@@ -9,6 +9,9 @@ training:
   loss: L1loss
   shuffle: True
 
+data:
+  max_tokens: 160
+
 path:
   train: data/train.csv
   dev: data/dev.csv
