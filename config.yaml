@@ -1,0 +1,10 @@
+model:
+  name: klue/roberta-small
+
+training:
+  epochs: 1
+  batch_size: 16
+  learning_rate: 0.00001
+  optimizer: Adam
+  loss: L1loss
+  shuffle: True
