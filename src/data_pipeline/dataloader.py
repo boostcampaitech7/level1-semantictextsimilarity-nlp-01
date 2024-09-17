@@ -5,26 +5,26 @@ from tqdm.auto import tqdm
 import transformers
 import torch
 import pytorch_lightning as pl
-from dataset import Dataset
+from data_pipeline.dataset import Dataset
 
 class Dataloader(pl.LightningDataModule):
-    def __init__(self, model_name, batch_size, shuffle, train_path, dev_path, test_path, predict_path):
+    def __init__(self, config):
         super().__init__()
-        self.model_name = model_name
-        self.batch_size = batch_size
-        self.shuffle = shuffle
+        self.model_name = config["model"]["name"]
+        self.batch_size = config["training"]["batch_size"]
+        self.shuffle = config["training"]["shuffle"]
 
-        self.train_path = train_path
-        self.dev_path = dev_path
-        self.test_path = test_path
-        self.predict_path = predict_path
+        self.train_path = config["path"]["train"]
+        self.dev_path = config["path"]["dev"]
+        self.test_path = config["path"]["test"]
+        self.predict_path = config["path"]["predict"]
 
         self.train_dataset = None
         self.val_dataset = None
         self.test_dataset = None
         self.predict_dataset = None
 
-        self.tokenizer = transformers.AutoTokenizer.from_pretrained(model_name, max_length=160)
+        self.tokenizer = transformers.AutoTokenizer.from_pretrained(self.model_name, max_length=config["data"]["max_tokens"])
         self.target_columns = ['label']
         self.delete_columns = ['id']
         self.text_columns = ['sentence_1', 'sentence_2']
