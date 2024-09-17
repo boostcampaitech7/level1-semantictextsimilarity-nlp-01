@@ -4,6 +4,7 @@ import pytorch_lightning as pl
 import torch
 import pandas as pd
 
+from utils.config import load_config
 from data_pipeline.dataloader import Dataloader
 from model.model import Model
  
@@ -11,6 +12,7 @@ if __name__ == '__main__':
     # 하이퍼 파라미터 등 각종 설정값을 입력받습니다
     # 터미널 실행 예시 : python3 run.py --batch_size=64 ...
     # 실행 시 '--batch_size=64' 같은 인자를 입력하지 않으면 default 값이 기본으로 실행됩니다
+    config = load_config()
     parser = argparse.ArgumentParser()
     parser.add_argument('--model_name', default='klue/roberta-small', type=str)
     parser.add_argument('--batch_size', default=16, type=int)
