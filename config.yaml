@@ -1,0 +1,19 @@
+model:
+  name: klue/roberta-small
+
+training:
+  epochs: 1
+  batch_size: 16
+  learning_rate: 0.00001
+  optimizer: Adam
+  loss: L1loss
+  shuffle: True
+
+data:
+  max_tokens: 160
+
+path:
+  train: data/train.csv
+  dev: data/dev.csv
+  test: data/dev.csv
+  predict: data/predict.csv
