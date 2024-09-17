@@ -3,20 +3,23 @@ import transformers
 import torch
 import torchmetrics
 import pytorch_lightning as pl
+from model.loss import get_loss
+from model.optimizer import get_optimizer
 
 class Model(pl.LightningModule):
-    def __init__(self, model_name, lr):
+    def __init__(self, config):
         super().__init__()
         self.save_hyperparameters()
 
-        self.model_name = model_name
-        self.lr = lr
+        self.model_name = config["model"]["name"]
+        self.lr = config["training"]["learning_rate"]
 
         # 사용할 모델을 호출합니다.
         self.plm = transformers.AutoModelForSequenceClassification.from_pretrained(
-            pretrained_model_name_or_path=model_name, num_labels=1)
+            pretrained_model_name_or_path=self.model_name, num_labels=1)
         # Loss 계산을 위해 사용될 L1Loss를 호출합니다.
-        self.loss_func = torch.nn.L1Loss()
+        self.loss_func = get_loss(config["training"]["loss"])
+        self.optimizer = get_optimizer(config["training"]["optimizer"])
 
     def forward(self, x):
         x = self.plm(x)['logits']
@@ -54,6 +57,6 @@ class Model(pl.LightningModule):
         return logits.squeeze()
 
     def configure_optimizers(self):
-        optimizer = torch.optim.AdamW(self.parameters(), lr=self.lr)
+        optimizer = self.optimizer(self.parameters(), lr=self.lr)
         return optimizer
 
