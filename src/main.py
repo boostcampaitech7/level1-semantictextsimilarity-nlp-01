@@ -21,10 +21,10 @@ if __name__ == '__main__':
     dataloader = Dataloader(config)
 
     # gpu가 없으면 'gpus=0'을, gpu가 여러개면 'gpus=4'처럼 사용하실 gpu의 개수를 입력해주세요
-    trainer = pl.Trainer(accelerator="gpu", devices=1, max_epochs=args.max_epoch, log_every_n_steps=1)
+    trainer = pl.Trainer(accelerator="gpu", devices=1, max_epochs=config["training"]["epochs"], log_every_n_steps=1)
     
     if args.mode == 'train':
-        model = Model(args.model_name, args.learning_rate)   
+        model = Model(config)   
         # Train part
         trainer.fit(model=model, datamodule=dataloader)
         trainer.test(model=model, datamodule=dataloader)
