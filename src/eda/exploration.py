@@ -21,3 +21,11 @@ def vizLabel(data):
     ax.set_xticks(np.arange(barW/2, 5, ((bins-1)//5)*barW), labels=[0,1,2,3,4,5])
     
     return fig
+
+def vizTokenLength(data):
+    fig, ax = plt.subplots()
+    flierprops = dict(marker='x', markersize=3, linestyle='none')
+    sns.boxplot(data=data[['tokenLength_1', 'tokenLength_2']], ax=ax, orient='h', flierprops=flierprops)
+    ax.set_yticklabels(['sentence_1', 'sentence_2'])
+    print(len(data[data['tokenLength_1'] > 70]), len(data[data['tokenLength_2'] > 70]))
+    return fig
