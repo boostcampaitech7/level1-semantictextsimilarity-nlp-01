@@ -27,5 +27,4 @@ def vizTokenLength(data):
     flierprops = dict(marker='x', markersize=3, linestyle='none')
     sns.boxplot(data=data[['tokenLength_1', 'tokenLength_2']], ax=ax, orient='h', flierprops=flierprops)
     ax.set_yticklabels(['sentence_1', 'sentence_2'])
-    print(len(data[data['tokenLength_1'] > 70]), len(data[data['tokenLength_2'] > 70]))
     return fig
