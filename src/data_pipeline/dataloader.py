@@ -1,4 +1,5 @@
 import pandas as pd
+import random
 
 from tqdm.auto import tqdm
 
@@ -28,6 +29,28 @@ class Dataloader(pl.LightningDataModule):
         self.target_columns = ['label']
         self.delete_columns = ['id']
         self.text_columns = ['sentence_1', 'sentence_2']
+        self.augmentation_method = config["data"].get("augmentation", {}).get("method", None)
+        self.augmentation_probability = config["data"].get("augmentation", {}).get("probability", 0.0)
+
+    def augment_data(self, dataframe):
+        if not self.augmentation_method or self.augmentation_probability <= 0:
+            return dataframe
+
+        augmented_data = []
+        for idx, item in tqdm(dataframe.iterrows(), desc='augmenting', total=len(dataframe)):
+            # augmentation_probability의 확률로 데이터를 증강
+            if random.random() < self.augmentation_probability or item['label'] == 0:
+                continue
+            
+            augmented_item = item.copy()
+            if self.augmentation_method == "swap_sentences":
+                augmented_item[self.text_columns[0]], augmented_item[self.text_columns[1]] = (
+                    augmented_item[self.text_columns[1]], augmented_item[self.text_columns[0]]
+                )
+            augmented_data.append(augmented_item)
+        
+        augmented_dataframe = pd.DataFrame(augmented_data)
+        return pd.concat([dataframe, augmented_dataframe], ignore_index=True)
 
     def tokenizing(self, dataframe):
         data = []
@@ -56,6 +79,7 @@ class Dataloader(pl.LightningDataModule):
         if stage == 'fit':
             # 학습 데이터와 검증 데이터셋을 호출합니다
             train_data = pd.read_csv(self.train_path)
+            train_data = self.augment_data(train_data)
             val_data = pd.read_csv(self.dev_path)
 
             # 학습데이터 준비
