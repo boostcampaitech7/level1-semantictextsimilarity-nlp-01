@@ -27,7 +27,7 @@ if __name__ == '__main__':
     
     if args.mode == 'train':
         
-        # 디버깅 코드 추가
+        # 디버깅 코드 추가 arg에 train 입력시 이하 코드 출력
         print('Running on train mode')
         model = Model(config)   
         # Train part
@@ -38,7 +38,7 @@ if __name__ == '__main__':
         torch.save(model, 'model.pt')
     elif args.mode == 'inference':
         
-        # 디버깅 코드 추가
+        # 디버깅 코드 추가 agr에 inference 입력시 이하 코드 출력
         print('Running on Inference Mode')
         
         # Inference part
