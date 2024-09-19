@@ -22,10 +22,13 @@ class Model(pl.LightningModule):
         self.optimizer = get_optimizer(config["training"]["optimizer"])
 
     def forward(self, x):
-        x = self.plm(x)['logits']
-
-        return x
-
+        input_ids = x['input_ids']
+        attention_mask = x['attention_mask']
+        outputs = self.plm(input_ids = input_ids,
+                           attention_mask = attention_mask)
+        
+        return outputs['logits']
+        
     def training_step(self, batch, batch_idx):
         x, y = batch
         logits = self(x)
