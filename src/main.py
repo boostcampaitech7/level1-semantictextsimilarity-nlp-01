@@ -15,7 +15,9 @@ if __name__ == '__main__':
     config = load_config()
     parser = argparse.ArgumentParser()
     parser.add_argument('--mode', type=str, default='train', help='train or inference mode')
-    args = parser.parse_args(args=[])
+    
+    args = parser.parse_args()
+    # args = parser.parse_args(args=[])
 
     # dataloader와 model을 생성합니다.
     dataloader = Dataloader(config)
@@ -24,6 +26,9 @@ if __name__ == '__main__':
     trainer = pl.Trainer(accelerator="gpu", devices=1, max_epochs=config["training"]["epochs"], log_every_n_steps=1)
     
     if args.mode == 'train':
+        
+        # 디버깅 코드 추가
+        print('Running on train mode')
         model = Model(config)   
         # Train part
         trainer.fit(model=model, datamodule=dataloader)
@@ -32,6 +37,10 @@ if __name__ == '__main__':
         # 학습이 완료된 모델을 저장합니다.
         torch.save(model, 'model.pt')
     elif args.mode == 'inference':
+        
+        # 디버깅 코드 추가
+        print('Running on Inference Mode')
+        
         # Inference part
         # 저장된 모델로 예측을 진행합니다.
         model = torch.load('model.pt')
