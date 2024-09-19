@@ -25,7 +25,9 @@ class Dataloader(pl.LightningDataModule):
         self.test_dataset = None
         self.predict_dataset = None
 
-        self.tokenizer = transformers.AutoTokenizer.from_pretrained(self.model_name, max_length=config["data"]["max_tokens"])
+        self.tokenizer = transformers.AutoTokenizer.from_pretrained(self.model_name, 
+                                                                    clean_up_tokenization_spaces = True, # 향후 버전에서 기본값 False임.(토큰화된 문자열을 원래 문자열로 더 정확하게 복원하기 위해 공백을 살리는 취지)
+                                                                    max_length=config["data"]["max_tokens"])
         self.target_columns = ['label']
         self.delete_columns = ['id']
         self.text_columns = ['sentence_1', 'sentence_2']
@@ -58,7 +60,11 @@ class Dataloader(pl.LightningDataModule):
             # 두 입력 문장을 [SEP] 토큰으로 이어붙여서 전처리합니다.
             text = '[SEP]'.join([item[text_column] for text_column in self.text_columns])
             outputs = self.tokenizer(text, add_special_tokens=True, padding='max_length', truncation=True)
-            data.append(outputs['input_ids'])
+            
+            # 패딩 부분을 구분할 수 있도록 attention_mask 살려서 data에 넣기
+            data.append({'input_ids':outputs['input_ids'],
+                         'attention_mask': outputs['attention_mask']
+                         })
         return data
 
     def preprocessing(self, data):
