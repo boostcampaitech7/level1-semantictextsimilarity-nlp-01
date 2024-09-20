@@ -108,13 +108,14 @@ class Dataloader(pl.LightningDataModule):
             self.predict_dataset = Dataset(predict_inputs, [])
 
     def train_dataloader(self):
-        return torch.utils.data.DataLoader(self.train_dataset, batch_size=self.batch_size, shuffle=self.shuffle)
+        # cpu 워커 좀 더 써보자... 지금 기본값이라 메인 프로세스만 쓰는중
+        return torch.utils.data.DataLoader(self.train_dataset, batch_size=self.batch_size, shuffle=self.shuffle, num_workers = 2)
 
     def val_dataloader(self):
-        return torch.utils.data.DataLoader(self.val_dataset, batch_size=self.batch_size)
+        return torch.utils.data.DataLoader(self.val_dataset, batch_size=self.batch_size, num_workers = 2)
 
     def test_dataloader(self):
-        return torch.utils.data.DataLoader(self.test_dataset, batch_size=self.batch_size)
+        return torch.utils.data.DataLoader(self.test_dataset, batch_size=self.batch_size, num_workers = 2)
 
     def predict_dataloader(self):
-        return torch.utils.data.DataLoader(self.predict_dataset, batch_size=self.batch_size)
+        return torch.utils.data.DataLoader(self.predict_dataset, batch_size=self.batch_size, num_workers = 2)
