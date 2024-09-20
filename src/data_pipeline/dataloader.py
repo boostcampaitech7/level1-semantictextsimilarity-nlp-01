@@ -41,7 +41,7 @@ class Dataloader(pl.LightningDataModule):
         augmented_data = []
         for idx, item in tqdm(dataframe.iterrows(), desc='augmenting', total=len(dataframe)):
             # augmentation_probability의 확률로 데이터를 증강
-            if random.random() < self.augmentation_probability or item['label'] == 0:
+            if random.random() > self.augmentation_probability or item['label'] == 0:
                 continue
             
             augmented_item = item.copy()
