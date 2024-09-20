@@ -1,6 +1,7 @@
 model:
   name: klue/roberta-small
 
+seed: 42
 
 training:
   epochs: 1

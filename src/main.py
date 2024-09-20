@@ -3,10 +3,17 @@ import argparse
 import pytorch_lightning as pl
 import torch
 import pandas as pd
+import random
 
 from utils.config import load_config
 from data_pipeline.dataloader import Dataloader
 from model.model import Model
+
+def set_seed(seed):
+    random.seed(seed)
+    torch.manual_seed(seed)  # CPU 시드 고정
+    torch.cuda.manual_seed(seed)  # GPU 시드 고정
+    torch.cuda.manual_seed_all(seed)  # 모든 GPU에 대한 시드 고정 (멀티 GPU 환경)
  
 if __name__ == '__main__':
     # 하이퍼 파라미터 등 각종 설정값을 입력받습니다
@@ -18,6 +25,10 @@ if __name__ == '__main__':
     
     args = parser.parse_args()
     # args = parser.parse_args(args=[])
+
+    # 재현을 위한 seed 고정
+    SEED = config["seed"]
+    set_seed(SEED)
 
     # dataloader와 model을 생성합니다.
     dataloader = Dataloader(config)
