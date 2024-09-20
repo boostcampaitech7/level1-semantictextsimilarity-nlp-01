@@ -19,4 +19,4 @@ path:
   train: data/train.csv
   dev: data/dev.csv
   test: data/dev.csv
-  predict: data/predict.csv
+  predict: data/test.csv # not predict.csv
