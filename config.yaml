@@ -1,6 +1,7 @@
 model:
   name: klue/roberta-small
 
+
 training:
   epochs: 1
   batch_size: 16
@@ -19,4 +20,4 @@ path:
   train: data/train.csv
   dev: data/dev.csv
   test: data/dev.csv
-  predict: data/test.csv # not predict.csv
+  predict: data/test.csv
