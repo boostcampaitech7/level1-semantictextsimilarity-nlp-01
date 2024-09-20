@@ -22,11 +22,10 @@ class Model(pl.LightningModule):
         self.optimizer = get_optimizer(config["training"]["optimizer"])
 
     def forward(self, x):
-        input_ids = x['input_ids']
-        attention_mask = x['attention_mask']
-        outputs = self.plm(input_ids = input_ids,
-                           attention_mask = attention_mask)
+        if not isinstance(x, dict):
+            raise ValueError("Invalid input format. Expected a dictionary.") # 디버깅
         
+        outputs = self.plm(**x)
         return outputs['logits']
         
     def training_step(self, batch, batch_idx):
@@ -45,19 +44,12 @@ class Model(pl.LightningModule):
 
         self.log("val_pearson", torchmetrics.functional.pearson_corrcoef(logits.squeeze(), y.squeeze()))
 
-        # return loss
 
     def test_step(self, batch, batch_idx):
         x, y = batch
         logits = self(x)
 
         self.log("test_pearson", torchmetrics.functional.pearson_corrcoef(logits.squeeze(), y.squeeze()))
-
-    def predict_step(self, batch, batch_idx):
-        x = batch
-        logits = self(x)
-
-        return logits.squeeze()
 
     def configure_optimizers(self):
         optimizer = self.optimizer(self.parameters(), lr=self.lr)
