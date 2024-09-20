@@ -13,8 +13,9 @@ training:
 data:
   max_tokens: 160
   augmentation:
-    method: swap_sentences
-    probability: 0.1
+    - method: swap_sentences
+      params:
+        probability: 1.0
 
 path:
   train: data/train.csv
