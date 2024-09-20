@@ -1,24 +1,20 @@
 model:
-  name: KDHyun08/TAACO_STS
+  name: klue/roberta-small
+
 
 training:
   epochs: 1
   batch_size: 16
   learning_rate: 0.00001
-  optimizer: AdamW
-  loss: L2loss
+  optimizer: Adam
+  loss: L1loss
   shuffle: True
-  weight_decay: 0.01
-  gradient_clipping: 1.0
-  warmup_steps: 1000
-  scheduler: CosineAnnealingLR
 
 data:
   max_tokens: 160
   augmentation:
     method: swap_sentences
     probability: 0.1
-  dropout_rate: 0.2
 
 path:
   train: data/train.csv
