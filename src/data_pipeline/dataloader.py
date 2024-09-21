@@ -73,21 +73,18 @@ class Dataloader(pl.LightningDataModule):
                          })
         return data
 
-    def cleaning(self, data):
+    def cleaning(self, dataframe):
         # 띄어쓰기 교정을 위한 spacing 객체를 생성합니다.
         spacing = Spacing()
 
-        for idx, item in tqdm(data.iterrows(), desc='cleaning', total=len(data)):
+        for idx, item in tqdm(dataframe.iterrows(), desc='cleaning', total=len(dataframe)):
             for text_column in self.text_columns:
-                # 2글자 넘게 반복되는 문자를 2글자의 문자열로 정규화합니다.
-                item[text_column] = re.sub(r'(.)\1{2,}', r'\1\1', item[text_column])
+                # 정규 표현식을 사용하여 3회 이상 반복되는 문자를 2회로 줄이고, 띄어쓰기 교정을 진행합니다.
+                item[text_column] = spacing(re.sub(r'(.)\1{2,}', r'\1\1', item[text_column])) if isinstance(item[text_column], str) else item[text_column]
                 
-                # 띄어쓰기 교정을 합니다.
-                item[text_column] = spacing(item[text_column])
-                
-                data.loc[idx, self.text_columns] = item[self.text_columns]
+                dataframe.loc[idx, text_column] = item[text_column]
 
-        return data
+        return dataframe
 
     def preprocessing(self, data):
         # 안쓰는 컬럼을 삭제합니다.
