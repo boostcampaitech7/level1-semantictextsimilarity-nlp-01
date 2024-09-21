@@ -85,7 +85,7 @@ class Dataloader(pl.LightningDataModule):
                 # 띄어쓰기 교정을 합니다.
                 item[text_column] = spacing(item[text_column])
                 
-                data.loc[idx] = item
+                data.loc[idx, self.text_columns] = item[self.text_columns]
 
         return data
 
