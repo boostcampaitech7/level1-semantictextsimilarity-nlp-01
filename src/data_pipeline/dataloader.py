@@ -9,6 +9,8 @@ import pytorch_lightning as pl
 
 from data_pipeline.dataset import Dataset
 from data_pipeline.augmentation import Augmentation
+from pykospacing import Spacing
+import re
 
 class Dataloader(pl.LightningDataModule):
     def __init__(self, config):
@@ -71,9 +73,28 @@ class Dataloader(pl.LightningDataModule):
                          })
         return data
 
+    def cleaning(self, data):
+        # 띄어쓰기 교정을 위한 spacing 객체를 생성합니다.
+        spacing = Spacing()
+
+        for idx, item in tqdm(data.iterrows(), desc='cleaning', total=len(data)):
+            for text_column in self.text_columns:
+                # 2글자 넘게 반복되는 문자를 2글자의 문자열로 정규화합니다.
+                item[text_column] = re.sub(r'(.)\1{2,}', r'\1\1', item[text_column])
+                
+                # 띄어쓰기 교정을 합니다.
+                item[text_column] = spacing(item[text_column])
+                
+                data.loc[idx] = item
+
+        return data
+
     def preprocessing(self, data):
         # 안쓰는 컬럼을 삭제합니다.
         data = data.drop(columns=self.delete_columns)
+
+        # 텍스트 데이터 클리닝을 진행합니다.
+        data = self.cleaning(data)
 
         # 타겟 데이터가 없으면 빈 배열을 리턴합니다.
         try:
