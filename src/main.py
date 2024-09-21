@@ -61,7 +61,15 @@ if __name__ == '__main__':
         predictions = list(round(float(i), 1) for i in torch.cat(predictions))
 
         # output 형식을 불러와서 예측된 결과로 바꿔주고, output.csv로 출력합니다.
-        output = pd.read_csv('./data/sample_submission.csv')
+        # output = pd.read_csv('./data/sample_submission.csv')
+        # output['target'] = predictions
+        
+        output_format = pd.read_csv('./data/sample_submission.csv')
+        output = pd.DataFrame(columns=output_format.columns) # output 형식의 columns만 참고
+        predict_csv = pd.read_csv(config["path"]["predict"])
+        for col in output.columns:
+            if col in predict_csv.columns:
+                output[col] = predict_csv[col] # output의 비어있는 행들은 predict_csv의 값으로 채워줌
         output['target'] = predictions
         output.to_csv('output.csv', index=False)
     else:
