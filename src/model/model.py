@@ -27,6 +27,8 @@ class Model(pl.LightningModule):
         
         outputs = self.plm(**x)
         logits = outputs['logits']
+        if self.training:
+            return logits
         logits = torch.clamp(logits, min=0, max=5)
         return logits
         
