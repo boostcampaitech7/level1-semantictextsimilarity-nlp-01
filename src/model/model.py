@@ -26,7 +26,9 @@ class Model(pl.LightningModule):
             raise ValueError("Invalid input format. Expected a dictionary.") # 디버깅
         
         outputs = self.plm(**x)
-        return outputs['logits']
+        logits = outputs['logits']
+        logits = torch.clamp(logits, min=0, max=5)
+        return logits
         
     def training_step(self, batch, batch_idx):
         x, y = batch
