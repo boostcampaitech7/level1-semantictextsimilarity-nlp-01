@@ -9,7 +9,6 @@ import pytorch_lightning as pl
 
 from data_pipeline.dataset import Dataset
 from data_pipeline.augmentation import Augmentation
-from pykospacing import Spacing
 import re
 
 class Dataloader(pl.LightningDataModule):
@@ -75,12 +74,12 @@ class Dataloader(pl.LightningDataModule):
 
     def cleaning(self, dataframe):
         # 띄어쓰기 교정을 위한 spacing 객체를 생성합니다.
-        spacing = Spacing()
 
         for idx, item in tqdm(dataframe.iterrows(), desc='cleaning', total=len(dataframe)):
             for text_column in self.text_columns:
                 # 정규 표현식을 사용하여 3회 이상 반복되는 문자를 2회로 줄이고, 띄어쓰기 교정을 진행합니다.
-                item[text_column] = spacing(re.sub(r'(.)\1{2,}', r'\1\1', item[text_column])) if isinstance(item[text_column], str) else item[text_column]
+                item[text_column] = re.sub(r'(.)\1{2,}', r'\1\1', item[text_column]) if isinstance(item[text_column], str) else item[text_column]
+                item[text_column] = ' '.join(self.tokenizer.tokenize(item[text_column]))
                 
                 dataframe.loc[idx, text_column] = item[text_column]
 
