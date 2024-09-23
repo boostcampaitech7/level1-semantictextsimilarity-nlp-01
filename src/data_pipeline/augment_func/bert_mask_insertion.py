@@ -1,5 +1,6 @@
 import importlib.util
 import os
+import random
 from data_pipeline.augment_func.AugFunction import AugFunction
 from utils.decorators import augment_func
 
@@ -23,6 +24,7 @@ class BertMaskInsertion(AugFunction):
             self.min = params.get("min", 0.0)
             self.max = params.get("max", 5.0)
         self.text_columns = params.get("text_columns", ["sentence_1", "sentence_2"])
+        self.target_columns = params.get("target_columns", ["label"])
         self.bmi = self.importBERTAugmentation()
     
     def importBERTAugmentation(self):
@@ -32,5 +34,28 @@ class BertMaskInsertion(AugFunction):
         spec.loader.exec_module(module)
         return module.BERT_Augmentation()
 
+    def makeLabel(self, target_col):
+        label = 0
+        if self.label_strategy == "useConstant":
+            label = self.constant
+        elif self.label_strategy == "useRandom":
+            label = random.uniform(self.min, self.max)
+        elif self.label_strategy == "useRatio":
+            label = self.min + (self.max - self.min) * (1 - self.ratio)
+        elif self.label_strategy == "useModel":
+            raise NotImplementedError("Model-based label generation is not implemented yet.")
+        label = round(label, 1)
+        return label
+
     def __call__(self, item):
-        return self.empty_item(item)
+        if random.random() > self.prob:
+            return self.empty_item(item)
+        item_list = []
+        for col in self.text_columns:
+            auged = item.copy()
+            counterpart = self.text_columns[0 if col == self.text_columns[1] else 1]
+            auged[counterpart] = self.bmi.random_masking_insertion(item[col], self.ratio)
+            for target_col in self.target_columns:
+                auged[target_col] = self.makeLabel(target_col)
+            item_list.append(auged)
+        return self.merge_items(item_list)
