@@ -20,6 +20,9 @@ data:
     - method: swap_sentences
       params:
         probability: 1.0
+    - method: bert_mask_insertion
+      params:
+        ratio: 0.15
 
 path:
   train: data/train.csv
