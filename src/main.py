@@ -35,7 +35,7 @@ if __name__ == '__main__':
     set_seed(SEED)
 
     # WandB 설정
-    wandb.login(key="aadeea1600199a35fa358306a6e7c09a4240f709")
+    wandb.login(key="your_wandb_key")
     wandb.init(project="U-4-do", config=config)
 
     # dataloader와 model을 생성합니다.
