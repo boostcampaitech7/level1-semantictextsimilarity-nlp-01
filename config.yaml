@@ -4,7 +4,7 @@ model:
 seed: 42
 
 training:
-  epochs: 20
+  epochs: 3
   batch_size: 32
   learning_rate: 0.00001
   optimizer: AdamW
@@ -20,6 +20,10 @@ data:
     - method: swap_sentences
       params:
         probability: 1.0
+  under_sampling:
+    - method: undersample_label_0
+      params:
+        probability: 0.5
 
 path:
   train: data/train.csv
