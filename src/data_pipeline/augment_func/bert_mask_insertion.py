@@ -8,6 +8,7 @@ class BertMaskInsertion(AugFunction):
     def __init__(self, **params):
         super().__init__()
         self.ratio = params.get("ratio", 0.0)
+        self.prob = params.get("probability", 1.0)
         self.label_stragegies = ["useConstant", "useRatio", "useModel", "useRandom"]
         self.label_strategy = params.get("label_strategy", "useConstant")
         assert self.label_strategy in self.label_stragegies, f"Label strategy must be one of {self.label_stragegies}"
