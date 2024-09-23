@@ -9,6 +9,7 @@ import pytorch_lightning as pl
 
 from data_pipeline.dataset import Dataset
 from data_pipeline.augmentation import Augmentation
+from data_pipeline.under_sampling import UnderSampling
 import re
 
 class Dataloader(pl.LightningDataModule):
@@ -37,6 +38,10 @@ class Dataloader(pl.LightningDataModule):
         # self.augmentation_method = config["data"].get("augmentation", {}).get("method", None)
         # self.augmentation_probability = config["data"].get("augmentation", {}).get("probability", 0.0)
         self.augmentation = Augmentation(config)
+        self.under_sampling = UnderSampling(config)
+
+    def under_sample_data(self, dataframe):
+        return self.under_sampling(dataframe)
 
     def augment_data(self, dataframe):
         # if not self.augmentation_method or self.augmentation_probability <= 0:
@@ -105,7 +110,9 @@ class Dataloader(pl.LightningDataModule):
         if stage == 'fit':
             # 학습 데이터와 검증 데이터셋을 호출합니다
             train_data = pd.read_csv(self.train_path)
+            train_data = self.under_sample_data(train_data)
             train_data = self.augment_data(train_data)
+            train_data.to_csv('./aug_train_data_under.csv',sep=',')
             val_data = pd.read_csv(self.dev_path)
 
             # 학습데이터 준비

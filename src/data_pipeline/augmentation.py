@@ -35,5 +35,5 @@ class Augmentation():
                         continue
                     augmented_data.append(augmented)
         augmented_data.append(data)
-        rtn = pd.concat(augmented_data)
+        rtn = pd.concat(augmented_data, ignore_index=True)
         return rtn
