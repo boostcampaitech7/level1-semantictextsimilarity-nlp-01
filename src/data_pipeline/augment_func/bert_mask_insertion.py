@@ -12,7 +12,7 @@ class BertMaskInsertion(AugFunction):
         self.ratio_min = params.get("ratio_min", 0.0)
         self.ratio_max = params.get("ratio_max", 1.0)
         self.prob = params.get("probability", 1.0)
-        self.label_stragegies = ["useConstant", "useRatio", "useModel", "useRandom"]
+        self.label_stragegies = ["useConstant", "useRatio", "useModel", "useRandom", "useRandomRatio"]
         self.label_strategy = params.get("label_strategy", "useConstant")
         assert self.label_strategy in self.label_stragegies, f"Label strategy must be one of {self.label_stragegies}"
         if self.label_strategy == "useConstant":
@@ -46,6 +46,8 @@ class BertMaskInsertion(AugFunction):
             label = self.min + (self.max - self.min) * (1 - self.ratio)
         elif self.label_strategy == "useModel":
             raise NotImplementedError("Model-based label generation is not implemented yet.")
+        elif self.label_strategy == "useRandomRatio":
+            label = self.min + (self.max - self.min) * ((self.ratio - self.ratio_min) / (self.ratio_max - self.ratio_min))
         label = round(label, 1)
         return label
 
