@@ -46,7 +46,8 @@ class Model(pl.LightningModule):
         loss = self.loss_func(logits, y.float())
         self.log("val_loss", loss)
 
-        self.log("val_pearson", torchmetrics.functional.pearson_corrcoef(logits.squeeze(), y.squeeze()))
+        # prog_bar=True를 통해 epoch마다 progress bar에 val_pearson 점수 출력
+        self.log("val_pearson", torchmetrics.functional.pearson_corrcoef(logits.squeeze(), y.squeeze()), prog_bar=True)
 
 
     def test_step(self, batch, batch_idx):

@@ -1,6 +1,7 @@
 import argparse
 
 import pytorch_lightning as pl
+from pytorch_lightning.loggers import CSVLogger
 import torch
 import pandas as pd
 import random
@@ -35,8 +36,17 @@ if __name__ == '__main__':
     # dataloader와 model을 생성합니다.
     dataloader = Dataloader(config)
 
+    # logging name 설정
+    model_name = config["model"]["name"]
+    batch_size = config["training"]["batch_size"]
+    learning_rate = config["training"]["learning_rate"]
+    log_name = f"{model_name}_bs{batch_size}_lr{learning_rate}"
+
+    # CSVLogger 설정
+    logger = CSVLogger(save_dir="logs", name=log_name)
+
     # gpu가 없으면 'gpus=0'을, gpu가 여러개면 'gpus=4'처럼 사용하실 gpu의 개수를 입력해주세요
-    trainer = pl.Trainer(accelerator="gpu", devices=1, max_epochs=config["training"]["epochs"], log_every_n_steps=1)
+    trainer = pl.Trainer(logger=logger, accelerator="gpu", devices=1, max_epochs=config["training"]["epochs"], log_every_n_steps=1)
     
     if args.mode == 'train':
         
