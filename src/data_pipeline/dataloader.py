@@ -106,7 +106,6 @@ class Dataloader(pl.LightningDataModule):
             # 학습 데이터와 검증 데이터셋을 호출합니다
             train_data = pd.read_csv(self.train_path)
             train_data = self.augment_data(train_data)
-            train_data.to_csv('./aug_train_data_under.csv',sep=',')
             val_data = pd.read_csv(self.dev_path)
 
             # 학습데이터 준비
