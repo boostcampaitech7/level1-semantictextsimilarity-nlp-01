@@ -75,7 +75,7 @@ class Dataloader(pl.LightningDataModule):
 
     def normalize(self, dataframe):
         # 데이터 정규화
-        for idx, item in tqdm(dataframe.iterrows(), desc='cleaning', total=len(dataframe)):
+        for idx, item in tqdm(dataframe.iterrows(), desc='normalizing', total=len(dataframe)):
             for text_column in self.text_columns:
                 # 정규 표현식을 사용하여 3회 이상 반복되는 문자를 2회로 줄이기
                 item[text_column] = re.sub(r'(.)\1{2,}', r'\1\1', item[text_column]) if isinstance(item[text_column], str) else item[text_column]
