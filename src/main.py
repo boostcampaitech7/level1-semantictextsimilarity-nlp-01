@@ -5,10 +5,12 @@ from pytorch_lightning.loggers import CSVLogger
 import torch
 import pandas as pd
 import random
+import wandb
 
 from utils.config import load_config
 from data_pipeline.dataloader import Dataloader
 from model.model import Model
+import os
 
 def set_seed(seed):
     random.seed(seed)
@@ -33,6 +35,10 @@ if __name__ == '__main__':
     SEED = config["seed"]
     set_seed(SEED)
 
+    # WandB 설정
+    wandb.login(key="your_wandb_key")
+    wandb.init(project="U-4-do", config=config)
+
     # dataloader와 model을 생성합니다.
     dataloader = Dataloader(config)
 
@@ -46,12 +52,28 @@ if __name__ == '__main__':
     logger = CSVLogger(save_dir="logs", name=log_name)
 
     # gpu가 없으면 'gpus=0'을, gpu가 여러개면 'gpus=4'처럼 사용하실 gpu의 개수를 입력해주세요
-    trainer = pl.Trainer(logger=logger, accelerator="gpu", devices=1, max_epochs=config["training"]["epochs"], log_every_n_steps=1)
+
+    trainer = pl.Trainer(accelerator="gpu", 
+                         devices=1, 
+                         max_epochs=config["training"]["epochs"], 
+                         log_every_n_steps=1,
+                         logger=pl.loggers.WandbLogger(),
+                         val_check_interval=0.04) # 학습데이터 4% 마다 val_check
+
     
     if args.mode == 'train':
         
         # 디버깅 코드 추가 arg에 train 입력시 이하 코드 출력
         print('Running on train mode')
+        
+        # 모델 경로가 존재하면 해당 모델을 불러오고, 그렇지 않으면 새로운 모델을 생성
+        if os.path.exists(args.model_path):
+            print(f"Loading model from {args.model_path}")
+            model = torch.load(args.model_path)
+        else:
+            model = Model(config)
+            
+            
         model = Model(config)   
         # Train part
         trainer.fit(model=model, datamodule=dataloader)
