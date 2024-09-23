@@ -25,6 +25,9 @@ class BertMaskInsertion(AugFunction):
         elif self.label_strategy == "useRandom":
             self.min = params.get("min", 0.0)
             self.max = params.get("max", 5.0)
+        elif self.label_strategy == "useRandomRatio":
+            self.min = params.get("min", 0.0)
+            self.max = params.get("max", 5.0)
         self.text_columns = params.get("text_columns", ["sentence_1", "sentence_2"])
         self.target_columns = params.get("target_columns", ["label"])
         self.bmi = self.importBERTAugmentation()
