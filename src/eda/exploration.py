@@ -28,3 +28,24 @@ def vizTokenLength(data):
     sns.boxplot(data=data[['tokenLength_1', 'tokenLength_2']], ax=ax, orient='h', flierprops=flierprops)
     ax.set_yticklabels(['sentence_1', 'sentence_2'])
     return fig
+
+def vizL1LossForLabel(data):
+    # data must have 'label' and 'target' columns
+    fig, ax = plt.subplots()
+    data['diff'] = abs(data['label'] - data['target'])
+    data['label_group'] = (data['label'] * 10 // 2) * 2 # 인접한 label을 묶어서 그룹화
+    label_diff_sum = data.groupby('label_group')['diff'].mean().reset_index()
+    
+    hist = sns.barplot(x='label_group', y='diff', data=label_diff_sum, ax=ax, width=1)
+    plt.xlim(-1.75, 26.75)
+
+    bins = 26
+    cmap = ['Reds', 'Purples', 'Blues', 'Greens', 'spring','Greys']
+    cmap = list(map(plt.get_cmap, cmap))
+    for i, patch in enumerate(hist.patches):
+        k = i // (bins//5)
+        patch.set_edgecolor('black')
+        patch.set_facecolor(cmap[k](1-(i % (bins//5)) / (3*(bins//5))))
+
+    ax.set_xticks(np.arange(0, 26, 5), labels=[0,1,2,3,4,5])
+    return fig
