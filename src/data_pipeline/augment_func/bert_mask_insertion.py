@@ -8,7 +8,9 @@ from utils.decorators import augment_func
 class BertMaskInsertion(AugFunction):
     def __init__(self, **params):
         super().__init__()
-        self.ratio = params.get("ratio", 0.0)
+        self.ratio = params.get("ratio", None)
+        self.ratio_min = params.get("ratio_min", 0.0)
+        self.ratio_max = params.get("ratio_max", 1.0)
         self.prob = params.get("probability", 1.0)
         self.label_stragegies = ["useConstant", "useRatio", "useModel", "useRandom"]
         self.label_strategy = params.get("label_strategy", "useConstant")
@@ -54,8 +56,13 @@ class BertMaskInsertion(AugFunction):
         for col in self.text_columns:
             auged = item.copy()
             counterpart = self.text_columns[0 if col == self.text_columns[1] else 1]
+            use_random_ratio = self.ratio is None
+            if use_random_ratio:
+                self.ratio = random.uniform(self.ratio_min, self.ratio_max)
             auged[counterpart] = self.bmi.random_masking_insertion(item[col], self.ratio)
             for target_col in self.target_columns:
                 auged[target_col] = self.makeLabel(target_col)
+            if use_random_ratio:
+                self.ratio = None
             item_list.append(auged)
         return self.merge_items(item_list)
