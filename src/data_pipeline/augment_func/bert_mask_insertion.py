@@ -22,12 +22,14 @@ class BertMaskInsertion(AugFunction):
             self.min = params.get("min", 0.0)
             self.max = params.get("max", 5.0)
         self.text_columns = params.get("text_columns", ["sentence_1", "sentence_2"])
-        self.bmi = self.importModule()
+        self.bmi = self.importBERTAugmentation()
     
-    def importModule(self):
-        file_path = os.path.abspath("../K-TACC/BERT_augmentation.py")
+    def importBERTAugmentation(self):
+        file_path = os.path.abspath("./K-TACC/BERT_augmentation.py")
         spec = importlib.util.spec_from_file_location("BERT_augmentation", file_path)
-        return importlib.util.module_from_spec(spec)
+        module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(module)
+        return module.BERT_Augmentation()
 
     def __call__(self, item):
         return self.empty_item(item)
