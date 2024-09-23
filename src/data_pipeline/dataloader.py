@@ -4,6 +4,7 @@ import random
 from tqdm.auto import tqdm
 
 import transformers
+from deep_translator import GoogleTranslator
 import torch
 import pytorch_lightning as pl
 
@@ -72,15 +73,16 @@ class Dataloader(pl.LightningDataModule):
                          })
         return data
 
-    def cleaning(self, dataframe):
-        # 띄어쓰기 교정을 위한 spacing 객체를 생성합니다.
-
+    def normalize(self, dataframe):
+        # 데이터 정규화
         for idx, item in tqdm(dataframe.iterrows(), desc='cleaning', total=len(dataframe)):
             for text_column in self.text_columns:
                 # 정규 표현식을 사용하여 3회 이상 반복되는 문자를 2회로 줄이기
                 item[text_column] = re.sub(r'(.)\1{2,}', r'\1\1', item[text_column]) if isinstance(item[text_column], str) else item[text_column]
-                
-                dataframe.loc[idx, text_column] = item[text_column]
+
+                # 영어 단어가 있을 때만 번역하여 대체합니다.
+                if re.search(r'[a-zA-Z]', item[text_column]):
+                    item[text_column] = re.sub(r'[a-zA-Z]+', lambda x: GoogleTranslator(source='en', target='ko').translate(x.group()), item[text_column])
 
         return dataframe
 
@@ -88,8 +90,8 @@ class Dataloader(pl.LightningDataModule):
         # 안쓰는 컬럼을 삭제합니다.
         data = data.drop(columns=self.delete_columns)
 
-        # 텍스트 데이터 클리닝을 진행합니다.
-        data = self.cleaning(data)
+        # 텍스트 데이터 정규화를 진행합니다.
+        data = self.normalize(data)
 
         # 타겟 데이터가 없으면 빈 배열을 리턴합니다.
         try:
