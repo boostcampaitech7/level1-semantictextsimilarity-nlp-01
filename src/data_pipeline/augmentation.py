@@ -26,14 +26,21 @@ class Augmentation():
     
     def __call__(self, data):
         augmented_data = []
-        for idx, item in tqdm(data.iterrows(), desc='augmenting', total=len(data)):
-            for aug in self.augmentation:
-                map_func = self.mappings[aug["method"]](**aug["params"])
+        # for idx, item in tqdm(data.iterrows(), desc='augmenting', total=len(data)):
+        #     for aug in self.augmentation:
+        #         map_func = self.mappings[aug["method"]](**aug["params"])
+        #         if aug["method"] in self.mappings:
+        #             augmented = map_func(item)
+        #             if augmented.empty:
+        #                 continue
+        #             augmented_data.append(augmented)
+        for aug in self.augmentation:
+            map_func = self.mappings[aug["method"]](**aug["params"])
+            for idx, item in tqdm(data.iterrows(), desc=aug["method"], total=len(data)):
                 if aug["method"] in self.mappings:
                     augmented = map_func(item)
                     if augmented.empty:
                         continue
-                    augmented_data.append(augmented)
         augmented_data.append(data)
         rtn = pd.concat(augmented_data)
         return rtn
