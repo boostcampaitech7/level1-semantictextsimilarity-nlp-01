@@ -37,9 +37,9 @@ def get_trainer(config, log_name):
  
 def train(base_config, model_path):
     
-    # wandb 설정
-    with wandb.init(config = base_config) as run:
-        config = load_and_merge_config(base_config, run.config)
+    # wandb 설정. wandb.init()을 호출하면 자동으로 sweep설정을 가져옴.
+    with wandb.init() as run:
+        config = load_and_merge_config(base_config, dict(wandb.config))
         # dataloader와 model을 생성
         dataloader = Dataloader(config)
         
