@@ -5,6 +5,7 @@ import torchmetrics
 import pytorch_lightning as pl
 from model.loss import get_loss
 from model.optimizer import get_optimizer
+from model.MultiTaskLoss import MultiTaskLoss
 
 class Model(pl.LightningModule):
     def __init__(self, config):
@@ -23,10 +24,11 @@ class Model(pl.LightningModule):
             self.plm = transformers.AutoModel.from_pretrained(pretrained_model_name_or_path=self.model_name)
             self.classifier1 = torch.nn.Linear(self.plm.config.hidden_size, 1)
             self.classifier2 = torch.nn.Linear(self.plm.config.hidden_size, 1)
-            self.bce_loss = torch.nn.BCEWithLogitsLoss()
             
         # Loss 계산을 위해 사용될 L1Loss를 호출합니다.
         self.loss_func = get_loss(config["training"]["loss"])
+        if self.multi_task:
+            self.loss_func = MultiTaskLoss(self.loss_func)
         self.optimizer = get_optimizer(config["training"]["optimizer"])
 
     def forward(self, x):
@@ -63,7 +65,10 @@ class Model(pl.LightningModule):
         self.log("val_loss", loss)
 
         # prog_bar=True를 통해 epoch마다 progress bar에 val_pearson 점수 출력
-        self.log("val_pearson", torchmetrics.functional.pearson_corrcoef(logits.squeeze(), y.squeeze()), prog_bar=True)
+        if self.multi_task:
+            self.log("val_pearson", torchmetrics.functional.pearson_corrcoef(logits[:, 0].squeeze(), y[:, 0].squeeze()), prog_bar=True)
+        else:
+            self.log("val_pearson", torchmetrics.functional.pearson_corrcoef(logits.squeeze(), y.squeeze()), prog_bar=True)
 
 
     def test_step(self, batch, batch_idx):
