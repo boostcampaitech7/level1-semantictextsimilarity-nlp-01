@@ -10,6 +10,7 @@ import wandb
 from utils.config import load_config
 from data_pipeline.dataloader import Dataloader
 from model.model import Model
+import os
 
 
 def set_seed(seed):
