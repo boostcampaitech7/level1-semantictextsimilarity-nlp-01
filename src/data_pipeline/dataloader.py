@@ -78,11 +78,11 @@ class Dataloader(pl.LightningDataModule):
         for idx, item in tqdm(dataframe.iterrows(), desc='normalizing', total=len(dataframe)):
             for text_column in self.text_columns:
                 # 정규 표현식을 사용하여 3회 이상 반복되는 문자를 2회로 줄이기
-                item[text_column] = re.sub(r'(.)\1{2,}', r'\1\1', item[text_column]) if isinstance(item[text_column], str) else item[text_column]
+                item[text_column] = re.sub(r'(.)\1{5,}', r'\1\1', item[text_column]) if isinstance(item[text_column], str) else item[text_column]
 
                 # 영어 단어가 있을 때만 번역하여 대체합니다.
-                if re.search(r'[a-zA-Z]', item[text_column]):
-                    item[text_column] = re.sub(r'[a-zA-Z]+', lambda x: GoogleTranslator(source='en', target='ko').translate(x.group()), item[text_column])
+                if re.search(r'(?![A-Z]+)[a-zA-Z]{5,}', item[text_column]):
+                    item[text_column] = re.sub(r'(?![A-Z]+)[a-zA-Z]+', lambda x: GoogleTranslator(source='en', target='ko').translate(x.group()), item[text_column])
 
         return dataframe
 
