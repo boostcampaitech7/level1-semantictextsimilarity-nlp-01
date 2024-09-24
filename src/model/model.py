@@ -75,7 +75,11 @@ class Model(pl.LightningModule):
         x, y = batch
         logits = self(x)
 
-        self.log("test_pearson", torchmetrics.functional.pearson_corrcoef(logits.squeeze(), y.squeeze()))
+        if self.multi_task:
+            self.log("test_pearson", torchmetrics.functional.pearson_corrcoef(logits[:, 0].squeeze(), y[:, 0].squeeze()), prog_bar=True)
+        else: 
+            self.log("test_pearson", torchmetrics.functional.pearson_corrcoef(logits.squeeze(), y.squeeze()))
+
 
     def configure_optimizers(self):
         optimizer = self.optimizer(self.parameters(), lr=self.lr)
