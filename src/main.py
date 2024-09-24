@@ -38,6 +38,16 @@ def train(base_config):
         config = load_and_merge_config(base_config, run.config)
         # dataloader와 model을 생성
         dataloader = Dataloader(config)
+        
+        if model_path and os.path.exists(model_path):
+            print("저장된 모델을 확인하였으며 해당 모델을 load하여 학습합니다")
+            print(f"Loading model from {model_path}")
+            model = torch.load(model_path)
+        else:
+            print("model_path를 확인하지 못하였으며 config.yaml에 있는 모델명으로 새로 학습합니다")
+            print("Creating new model")
+            model = Model(config)
+        
         model = Model(config)
         
         # logging name 설정
