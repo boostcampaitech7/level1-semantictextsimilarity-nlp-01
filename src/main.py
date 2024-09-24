@@ -36,8 +36,8 @@ if __name__ == '__main__':
     set_seed(SEED)
 
     # WandB 설정
-    wandb.login(key="your_wandb_key")
-    wandb.init(project= 적당한 이름 넣을 것,  # ex) "U-4-do"
+    wandb.login(key="")
+    wandb.init(project= pass ,  # ex) 개인 프로젝트에 맞춰 수정
                config=config,
                name = f"{args.model_path}", 
                entity='nlp-01'
