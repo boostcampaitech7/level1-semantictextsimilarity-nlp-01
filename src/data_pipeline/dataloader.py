@@ -82,7 +82,6 @@ class Dataloader(pl.LightningDataModule):
 
                 # 영어 단어가 있을 때만 번역하여 대체합니다.
                 if re.search(r'(?![A-Z]+)[a-zA-Z]{5,}', item[text_column]):
-                    print(item[text_column])
                     item[text_column] = re.sub(r'(?![A-Z]+)[a-zA-Z]+', lambda x: GoogleTranslator(source='en', target='ko').translate(x.group()), item[text_column])
 
         return dataframe
