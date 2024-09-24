@@ -15,22 +15,38 @@ class Model(pl.LightningModule):
         self.lr = config["training"]["learning_rate"]
 
         # 사용할 모델을 호출합니다.
-        self.plm = transformers.AutoModelForSequenceClassification.from_pretrained(
-            pretrained_model_name_or_path=self.model_name, num_labels=1)
+        self.multi_task = config["model"]["multi_tasks"]
+        if not self.multi_task:
+            self.plm = transformers.AutoModelForSequenceClassification.from_pretrained(
+                pretrained_model_name_or_path=self.model_name, num_labels=1)
+        else:
+            self.plm = transformers.AutoModel.from_pretrained(pretrained_model_name_or_path=self.model_name)
+            self.classifier1 = torch.nn.Linear(self.plm.config.hidden_size, 1)
+            self.classifier2 = torch.nn.Linear(self.plm.config.hidden_size, 1)
+            self.bce_loss = torch.nn.BCEWithLogitsLoss()
+            
         # Loss 계산을 위해 사용될 L1Loss를 호출합니다.
         self.loss_func = get_loss(config["training"]["loss"])
         self.optimizer = get_optimizer(config["training"]["optimizer"])
 
     def forward(self, x):
-        if not isinstance(x, dict):
-            raise ValueError("Invalid input format. Expected a dictionary.") # 디버깅
-        
-        outputs = self.plm(**x)
-        logits = outputs['logits']
-        if self.training:
+        if not self.multi_task:
+            if not isinstance(x, dict):
+                raise ValueError("Invalid input format. Expected a dictionary.") # 디버깅
+            outputs = self.plm(**x)
+            logits = outputs['logits']
+            if self.training:
+                return logits
+            logits = torch.clamp(logits, min=0, max=5)
             return logits
-        logits = torch.clamp(logits, min=0, max=5)
-        return logits
+        else:
+            outputs = self.plm(**x)
+            cls_token = outputs.last_hidden_state[:, 0, :]
+            
+            logits1 = self.classifier1(cls_token) # logits1: regression task
+            logits2 = self.classifier2(cls_token) # logits2: binary classification task
+            logits_all = torch.cat([logits1, logits2], dim=1)
+            return logits_all
         
     def training_step(self, batch, batch_idx):
         x, y = batch
