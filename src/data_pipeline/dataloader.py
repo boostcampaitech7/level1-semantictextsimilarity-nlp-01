@@ -106,6 +106,7 @@ class Dataloader(pl.LightningDataModule):
 
         # return dataframe
 
+
     def preprocessing(self, data):
         # 안쓰는 컬럼을 삭제합니다.
         data = data.drop(columns=self.delete_columns)
