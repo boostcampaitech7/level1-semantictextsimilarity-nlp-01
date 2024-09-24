@@ -37,7 +37,11 @@ if __name__ == '__main__':
 
     # WandB 설정
     wandb.login(key="your_wandb_key")
-    wandb.init(project="U-4-do", config=config)
+    wandb.init(project= 적당한 이름 넣을 것,  # ex) "U-4-do"
+               config=config,
+               name = f"{args.model_path}", 
+               entity='nlp-01'
+               )
 
     # dataloader와 model을 생성합니다.
     dataloader = Dataloader(config)
@@ -58,7 +62,8 @@ if __name__ == '__main__':
                          max_epochs=config["training"]["epochs"], 
                          log_every_n_steps=1,
                          logger=pl.loggers.WandbLogger(),
-                         val_check_interval=0.04) # 학습데이터 4% 마다 val_check
+                        #  val_check_interval=0.04 # 학습데이터 4% 마다 val_check
+                         ) 
 
     
     if args.mode == 'train':
