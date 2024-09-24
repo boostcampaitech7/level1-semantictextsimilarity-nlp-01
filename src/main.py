@@ -10,90 +10,93 @@ import wandb
 from utils.config import load_config
 from data_pipeline.dataloader import Dataloader
 from model.model import Model
-import os
+
 
 def set_seed(seed):
     random.seed(seed)
     torch.manual_seed(seed)  # CPU 시드 고정
     torch.cuda.manual_seed(seed)  # GPU 시드 고정
     torch.cuda.manual_seed_all(seed)  # 모든 GPU에 대한 시드 고정 (멀티 GPU 환경)
+
+def load_and_merge_config(base_config, wandb_config):
+    return {**base_config, **wandb_config}
+
+def get_trainer(config, log_name):
+    return pl.Trainer(
+        accelerator ="gpu",
+        devices=1,
+        max_epochs=config["training"]["epochs"],
+        log_every_n_steps=1,
+        logger =[CSVLogger(save_dir="logs", name=log_name),
+                 pl.loggers.WandbLogger()]
+                    )
  
-if __name__ == '__main__':
-    # 하이퍼 파라미터 등 각종 설정값을 입력받습니다
-    # 터미널 실행 예시 : python3 run.py --batch_size=64 ...
-    # 실행 시 '--batch_size=64' 같은 인자를 입력하지 않으면 default 값이 기본으로 실행됩니다
-    config = load_config()
-    parser = argparse.ArgumentParser()
-    parser.add_argument('--mode', type=str, default='train', 
-                        help='train or inference mode')
-    parser.add_argument('--model_path', type=str, default ='model.pt', 
-                        help = 'path to the model weights file. you can save or extract weight from this path and you should write in with ".pt"')
-    args = parser.parse_args()
-    # args = parser.parse_args(args=[])
-
-    # 재현을 위한 seed 고정
-    SEED = config["seed"]
-    set_seed(SEED)
-
-    # WandB 설정
-    wandb.login(key="")
-    wandb.init(project= pass ,  # ex) 개인 프로젝트에 맞춰 수정
-               config=config,
-               name = f"{args.model_path}", 
-               entity='nlp-01'
-               )
-
-    # dataloader와 model을 생성합니다.
-    dataloader = Dataloader(config)
-
-    # logging name 설정
-    model_name = config["model"]["name"]
-    batch_size = config["training"]["batch_size"]
-    learning_rate = config["training"]["learning_rate"]
-    log_name = f"{model_name}_bs{batch_size}_lr{learning_rate}"
-
-    # CSVLogger 설정
-    logger = CSVLogger(save_dir="logs", name=log_name)
-
-    # gpu가 없으면 'gpus=0'을, gpu가 여러개면 'gpus=4'처럼 사용하실 gpu의 개수를 입력해주세요
-
-    trainer = pl.Trainer(accelerator="gpu", 
-                         devices=1, 
-                         max_epochs=config["training"]["epochs"], 
-                         log_every_n_steps=1,
-                         logger=pl.loggers.WandbLogger(),
-                        #  val_check_interval=0.04 # 학습데이터 4% 마다 val_check
-                         ) 
-
+def train(base_config):
     
-    if args.mode == 'train':
+    # wandb 설정
+    with wandb.init(config = base_config) as run:
+        config = load_and_merge_config(base_config, run.config)
+        # dataloader와 model을 생성
+        dataloader = Dataloader(config)
+        model = Model(config)
         
-        # 디버깅 코드 추가 arg에 train 입력시 이하 코드 출력
-        print('Running on train mode')
+        # logging name 설정
+        log_name = f"{config['model']['name']}_bs{config['training']['batch_size']}_lr{config['training']['learning_rate']}"
+    
+        # trainer 설정
+        trainer = get_trainer(config, log_name)
         
-        # 모델 경로가 존재하면 해당 모델을 불러오고, 그렇지 않으면 새로운 모델을 생성
-        if os.path.exists(args.model_path):
-            print(f"Loading model from {args.model_path}")
-            model = torch.load(args.model_path)
-        else:
-            model = Model(config)
-            
-            
-        model = Model(config)   
-        # Train part
+        # 학습 및 테스트
         trainer.fit(model=model, datamodule=dataloader)
         trainer.test(model=model, datamodule=dataloader)
+        
+        # 학습이 완료된 모델을 저장함.
+        torch.save(model, f"model_{wandb.run.id}.pt")
+        
 
-        # 학습이 완료된 모델을 저장합니다.
-        torch.save(model, f"{args.model_path}")
+def main():
+    base_config = load_config()
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--mode', type=str, default='train', help='train or inference mode')
+    parser.add_argument('--model_path', type=str, default ='model.pt', help='path to the model weights file')
+    args = parser.parse_args()
+        
+    # 재현을 위한 seed 고정
+    set_seed(base_config["seed"])
+    
+    if args.mode == 'train':
+        print("Running on train mode")
+        
+        sweep_config = {
+            'method': 'random',
+            'metric': {'name': 'val_loss', 'goal': 'minimize'},
+            'parameters': {
+                'training.batch_size': {'values': [4, 8, 16]},
+                'training.learning_rate': {'min': 1e-5, 'max': 1e-3},
+                'training.epochs': {'values': [3, 5, 10, 20]},
+                'training.weight_decay': {'min': 0.001, 'max': 0.1},
+                'training.optimizer': {'values': ['AdamW', 'Adam', 'SGD']},
+                'training.scheduler': {'values': ['CosineAnnealingLR', 'StepLR', 'ReduceLROnPlateau']},
+                'training.loss': {'values': ['L1Loss', 'L2Loss']},
+                'data.dropout_rate': {'min': 0.1, 'max': 0.5},
+                'data.augmentation.0.params.probability': {'min': 0.5, 'max': 1.0}
+            }
+        }
+        
+        wandb.login(key="aadeea1600199a35fa358306a6e7c09a4240f709")
+        sweep_id = wandb.sweep(sweep_config, project="U-4-do", entity='nlp-01')
+        wandb.agent(sweep_id, lambda: train(base_config), count = 5) # 5번 실험 실행
+       
     elif args.mode == 'inference':
         
         # 디버깅 코드 추가 agr에 inference 입력시 이하 코드 출력
         print('Running on Inference Mode')
+        config = load_config()
+        dataloader = Dataloader(config)
         
-        # Inference part
-        # 저장된 모델로 예측을 진행합니다.
+        # 저장된 모델로 예측을 진행
         model = torch.load(args.model_path)
+        trainer = get_trainer(config, "inference")
         predictions = trainer.predict(model=model, datamodule=dataloader)
 
         # 예측된 결과를 형식에 맞게 반올림하여 준비합니다.
@@ -113,3 +116,6 @@ if __name__ == '__main__':
         output.to_csv('output.csv', index=False)
     else:
         raise ValueError('mode should be either "train" or "inference"')
+
+if __name__ == '__main__':
+    main()
