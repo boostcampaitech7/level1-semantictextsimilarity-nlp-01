@@ -23,6 +23,7 @@ class Dataloader(pl.LightningDataModule):
         self.dev_path = config["path"]["dev"]
         self.test_path = config["path"]["test"]
         self.predict_path = config["path"]["predict"]
+        self.multi_task = config["model"]["multi_tasks"]
 
         self.train_dataset = None
         self.val_dataset = None
@@ -33,6 +34,8 @@ class Dataloader(pl.LightningDataModule):
                                                                     clean_up_tokenization_spaces = True, # 향후 버전에서 기본값 False임.(토큰화된 문자열을 원래 문자열로 더 정확하게 복원하기 위해 공백을 살리는 취지)
                                                                     max_length=config["data"]["max_tokens"])
         self.target_columns = ['label']
+        if self.multi_task:
+            self.target_columns.append('binary-label')
         self.delete_columns = ['id']
         self.text_columns = ['sentence_1', 'sentence_2']
         # self.augmentation_method = config["data"].get("augmentation", {}).get("method", None)
@@ -100,7 +103,7 @@ class Dataloader(pl.LightningDataModule):
             targets = []
         # 텍스트 데이터를 전처리합니다.
         inputs = self.tokenizing(data)
-
+        print(targets)
         return inputs, targets
 
     def setup(self, stage='fit'):
