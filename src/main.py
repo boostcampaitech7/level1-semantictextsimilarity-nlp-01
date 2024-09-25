@@ -38,7 +38,7 @@ def get_trainer(config, log_name):
 def train(base_config, model_path):
     
     # wandb 설정. wandb.init()을 호출하면 자동으로 sweep설정을 가져옴.
-    with wandb.init() as run:
+    with wandb.init(project="U-4-do") as run:
         config = load_and_merge_config(base_config, dict(wandb.config))
         # dataloader와 model을 생성
         dataloader = Dataloader(config)
@@ -82,7 +82,8 @@ def main():
     # 재현을 위한 seed 고정
     set_seed(base_config["seed"])
     
-    wandb.login(key="aadeea1600199a35fa358306a6e7c09a4240f709")
+    secrets = load_config(config_path="secrets.yaml")
+    wandb.login(key=secrets["wandb-api-key"])
 
     if args.mode == 'train':
         print("Running on train mode")
