@@ -82,7 +82,8 @@ def main():
     # 재현을 위한 seed 고정
     set_seed(base_config["seed"])
     
-    wandb.login(key="aadeea1600199a35fa358306a6e7c09a4240f709")
+    secrets = load_config(config_path="secrets.yaml")
+    wandb.login(key=secrets["wandb-api-key"])
 
     if args.mode == 'train':
         print("Running on train mode")
