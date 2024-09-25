@@ -110,7 +110,7 @@ def main():
                                 'training.batch_size': {'values': [8, 16, 32]},
                                 'training.learning_rate': {'min': 1e-5, 'max': 5e-4},
                                 'training.optimizer': {'values': ['AdamW']},
-                                'training.loss': {'values': ['L1loss', 'MSEloss', 'HuberLoss']},
+                                'training.loss': {'values': ['L1loss', 'MSEloss', 'HuberLoss', 'SmoothL1loss', BCEloss]},
                                 'data.dropout_rate': {'min': 0.1, 'max': 0.2},
                                 'data.augmentation_probability': {'min': 0.4, 'max': 1.0}
                             }
