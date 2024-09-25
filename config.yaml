@@ -1,6 +1,6 @@
 model:
   name: snunlp/KR-ELECTRA-discriminator
-  multi_tasks: True
+  multi_tasks: False
 
 seed: 42
 
