@@ -11,6 +11,7 @@ from utils.config import load_config
 from data_pipeline.dataloader import Dataloader
 from model.model import Model
 import os
+import copy
 
 
 def set_seed(seed):
@@ -21,18 +22,22 @@ def set_seed(seed):
 
 
 def load_and_merge_config(base_config, wandb_config):
-    merged_config = base_config.copy()
+    merged_config = copy.deepcopy(base_config)
     for key, value in wandb_config.items():
-        if isinstance(value, dict) and key in merged_config:
-            merged_config[key] = load_and_merge_config(merged_config[key], value)
-        else:
-            keys = key.split('.')
-            current = merged_config
-            for k in keys[:-1]:
-                if k not in current:
-                    current[k] = {}
-                current = current[k]
-            current[keys[-1]] = value
+        if key in ['epochs', 'batch_size', 'learning_rate', 'optimizer', 'loss']:
+            merged_config['training'][key] = value
+        elif key == 'dropout_rate':
+            merged_config['data'][key] = value
+        elif key == 'swamp_sentence_probability':
+            for aug in merged_config['data']['augmentation']:
+                if aug['method'] == 'swap_sentences':
+                    aug['params']['probability'] = value
+                    break
+        elif key == 'undersample_label_0':
+            for aug in merged_config['data']['augmentation']:
+                if aug['method'] == 'undersample_label_0':
+                    aug['params']['probability'] = value
+                    break
     return merged_config
 
 
@@ -48,10 +53,12 @@ def get_trainer(config, log_name):
  
  
 def train(base_config, model_path):
-    
-    # wandb 설정. wandb.init()을 호출하면 자동으로 sweep설정을 가져옴.
     with wandb.init(project="U-4-do") as run:
-        config = load_and_merge_config(base_config, dict(wandb.config))
+        wandb_config = dict(wandb.config)
+        config = load_and_merge_config(base_config, wandb_config)
+        print("wandb_config:", wandb_config)
+        print("Merged config:", config)
+        
         # dataloader와 model을 생성
         dataloader = Dataloader(config)
         
@@ -59,7 +66,6 @@ def train(base_config, model_path):
             print(f"Loading model from {model_path}")
             model = Model(config)
             model = torch.load(model_path)
-            
         else:
             print("Creating new model")
             model = Model(config)
@@ -73,8 +79,6 @@ def train(base_config, model_path):
         # 학습 및 테스트
         trainer.fit(model=model, datamodule=dataloader)
         trainer.test(model=model, datamodule=dataloader)
-        
-        
         
         torch.save(model, f"model_{wandb.run.id}.pt")
         
@@ -103,18 +107,19 @@ def main():
                             'method': 'bayes',
                             'metric': {'name': 'val_loss', 'goal': 'minimize'},
                             'parameters': {
-                                'training.epochs': {'values': [5, 8, 15, 20]},
-                                'training.batch_size': {'values': [8, 16, 32]},
-                                'training.learning_rate': {'min': 1e-5, 'max': 5e-4},
-                                'training.optimizer': {'values': ['AdamW']},
-                                'training.loss': {'values': ['L1loss', 'MSEloss', 'HuberLoss', 'SmoothL1loss', 'BCEloss']},
-                                'data.dropout_rate': {'min': 0.1, 'max': 0.2},
-                                'data.augmentation_probability': {'min': 0.4, 'max': 1.0}
+                                'epochs': {'values': [7, 13, 20]},
+                                'batch_size': {'values': [4, 8, 16]},
+                                'learning_rate': {'min': 0.000008, 'max': 0.00002},
+                                'optimizer': {'values': ['AdamW']},
+                                'loss': {'values': ['L1loss', 'MSEloss', 'HuberLoss', 'SmoothL1loss', 'BCEloss']},
+                                'dropout_rate': {'min': 0.1, 'max': 0.25},
+                                'swamp_sentence_probability': {'min': 0.4, 'max': 1.0},
+                                'undersample_label_0': {'min': 0.0, 'max': 0.1}
                             }
                             }
         
             sweep_id = wandb.sweep(sweep_config, project="U-4-do", entity='nlp-01')
-            wandb.agent(sweep_id, lambda: train(base_config, args.model_path), count = 5) # 5번 실험 실행
+            wandb.agent(sweep_id, lambda: train(base_config, args.model_path), count = 7) # 5번 실험 실행
         
         else:
             print("Running without wandb sweep")
