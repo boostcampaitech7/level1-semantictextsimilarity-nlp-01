@@ -14,6 +14,7 @@ class Model(pl.LightningModule):
 
         self.model_name = config["model"]["name"]
         self.lr = config["training"]["learning_rate"]
+        self.loss_name = get_loss(config["training"]["loss"])
 
         # 사용할 모델을 호출합니다.
         self.multi_task = config["model"]["multi_tasks"]
@@ -57,6 +58,8 @@ class Model(pl.LightningModule):
         x, y = batch
         logits = self(x)
         loss = self.loss_func(logits, y.float())
+        if self.loss_name == 'RMSEloss':
+            loss = torch.sqrt(loss)
         self.log("train_loss", loss)
 
         return loss
@@ -65,6 +68,8 @@ class Model(pl.LightningModule):
         x, y = batch
         logits = self(x)
         loss = self.loss_func(logits, y.float())
+        if self.loss_name == 'RMSEloss':
+            loss = torch.sqrt(loss)
         self.log("val_loss", loss)
 
         # prog_bar=True를 통해 epoch마다 progress bar에 val_pearson 점수 출력
