@@ -6,7 +6,9 @@ def get_loss(loss_name):
         "L2loss": nn.MSELoss(),
         "MSEloss": nn.MSELoss(),
         "BCEloss": nn.BCELoss(),
-        "HuberLoss": nn.HuberLoss()
+        "HuberLoss": nn.HuberLoss(),
+        "RMSEloss": nn.MSELoss(),
+        "SmoothL1loss": nn.SmoothL1Loss(),
     }
     try:
         return loss_dict[loss_name]
