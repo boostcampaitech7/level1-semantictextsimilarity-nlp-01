@@ -21,7 +21,19 @@ def set_seed(seed):
 
 
 def load_and_merge_config(base_config, wandb_config):
-    return {**base_config, **wandb_config}
+    merged_config = base_config.copy()
+    for key, value in wandb_config.items():
+        if isinstance(value, dict) and key in merged_config:
+            merged_config[key] = load_and_merge_config(merged_config[key], value)
+        else:
+            keys = key.split('.')
+            current = merged_config
+            for k in keys[:-1]:
+                if k not in current:
+                    current[k] = {}
+                current = current[k]
+            current[keys[-1]] = value
+    return merged_config
 
 
 def get_trainer(config, log_name):
@@ -82,7 +94,7 @@ def main():
     # 재현을 위한 seed 고정
     set_seed(base_config["seed"])
     
-    wandb.login(key="aadeea1600199a35fa358306a6e7c09a4240f709")
+    wandb.login(key="")
 
     if args.mode == 'train':
         print("Running on train mode")
@@ -90,20 +102,18 @@ def main():
         if args.sweep:
             print("Running Sweep")
             sweep_config = {
-                'method': 'random',
-                'metric': {'name': 'val_loss', 'goal': 'minimize'},
-                'parameters': {
-                    'training.batch_size': {'values': [4, 8, 16]},
-                    'training.learning_rate': {'min': 1e-5, 'max': 1e-3},
-                    'training.epochs': {'values': [3, 5, 10, 20]},
-                    'training.weight_decay': {'min': 0.001, 'max': 0.1},
-                    'training.optimizer': {'values': ['AdamW', 'Adam', 'SGD']},
-                    'training.scheduler': {'values': ['CosineAnnealingLR', 'StepLR', 'ReduceLROnPlateau']},
-                    'training.loss': {'values': ['L1Loss', 'L2Loss']},
-                    'data.dropout_rate': {'min': 0.1, 'max': 0.5},
-                    'data.augmentation.0.params.probability': {'min': 0.5, 'max': 1.0}
-                }
-            }
+                            'method': 'random',
+                            'metric': {'name': 'val_loss', 'goal': 'minimize'},
+                            'parameters': {
+                                'training.epochs': {'values': [5, 8, 15, 20]},
+                                'training.batch_size': {'values': [8, 16, 32]},
+                                'training.learning_rate': {'min': 1e-5, 'max': 5e-4},
+                                'training.optimizer': {'values': ['AdamW']},
+                                'training.loss': {'values': ['L1loss', 'MSEloss', 'HuberLoss']},
+                                'data.dropout_rate': {'min': 0.1, 'max': 0.2},
+                                'data.augmentation_probability': {'min': 0.4, 'max': 1.0}
+                            }
+                            }
         
             sweep_id = wandb.sweep(sweep_config, project="U-4-do", entity='nlp-01')
             wandb.agent(sweep_id, lambda: train(base_config, args.model_path), count = 5) # 5번 실험 실행
