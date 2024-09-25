@@ -86,8 +86,8 @@ class Dataloader(pl.LightningDataModule):
                     row[column] = re.sub(r'(.)\1{2,}', r'\1\1', row[column])
                     
                     # 영어 단어가 있을 때만 번역하여 대체
-                    if re.search(r'[a-zA-Z]', row[column]):
-                        row[column] = re.sub(r'[a-zA-Z]+', lambda x: GoogleTranslator(source='en', target ='ko').translate(x.group()), row[column])
+                    if re.search(r'(?![A-Z]+)[a-zA-Z]{5,}', row[column]):
+                        row[column] = re.sub(r'(?![A-Z]+)[a-zA-Z]{5,}', lambda x: GoogleTranslator(source='en', target ='ko').translate(x.group()), row[column])
                         
             return row
         
