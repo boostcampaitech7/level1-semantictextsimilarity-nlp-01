@@ -6,8 +6,9 @@ def get_loss(loss_name):
         "L2loss": nn.MSELoss(),
         "MSEloss": nn.MSELoss(),
         "BCEloss": nn.BCELoss(),
+        "HuberLoss": nn.HuberLoss()
     }
     try:
         return loss_dict[loss_name]
-    except:
+    except KeyError:
         raise NotImplementedError(f"Not Implemented Loss Function: {loss_name}")
