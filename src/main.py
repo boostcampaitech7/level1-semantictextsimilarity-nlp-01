@@ -76,10 +76,7 @@ def train(base_config, model_path):
         
         
         
-        if not os.path.exists(model_path):
-            torch.save(model, model_path)
-        else:
-            torch.save(model, f"model_{wandb.run.id}.pt")
+        torch.save(model, f"model_{wandb.run.id}.pt")
         
 
 def main():
