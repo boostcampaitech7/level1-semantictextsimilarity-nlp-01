@@ -47,8 +47,11 @@ class Model(pl.LightningModule):
             
             logits1 = self.classifier1(cls_token) # logits1: regression task
             logits2 = self.classifier2(cls_token) # logits2: binary classification task
-            logits_all = torch.cat([logits1, logits2], dim=1)
-            return logits_all
+            if self.training:
+                logits_all = torch.cat([logits1, logits2], dim=1)
+                return logits_all
+            logits1 = torch.clamp(logits1, min=0, max=5)
+            return logits1
         
     def training_step(self, batch, batch_idx):
         x, y = batch
@@ -65,20 +68,20 @@ class Model(pl.LightningModule):
         self.log("val_loss", loss)
 
         # prog_bar=True를 통해 epoch마다 progress bar에 val_pearson 점수 출력
-        if self.multi_task:
-            self.log("val_pearson", torchmetrics.functional.pearson_corrcoef(logits[:, 0].squeeze(), y[:, 0].squeeze()), prog_bar=True)
-        else:
-            self.log("val_pearson", torchmetrics.functional.pearson_corrcoef(logits.squeeze(), y.squeeze()), prog_bar=True)
+        # if self.multi_task:
+        #     self.log("val_pearson", torchmetrics.functional.pearson_corrcoef(logits[:, 0].squeeze(), y[:, 0].squeeze()), prog_bar=True)
+        # else:
+        self.log("val_pearson", torchmetrics.functional.pearson_corrcoef(logits.squeeze(), y.squeeze()), prog_bar=True)
 
 
     def test_step(self, batch, batch_idx):
         x, y = batch
         logits = self(x)
 
-        if self.multi_task:
-            self.log("test_pearson", torchmetrics.functional.pearson_corrcoef(logits[:, 0].squeeze(), y[:, 0].squeeze()), prog_bar=True)
-        else: 
-            self.log("test_pearson", torchmetrics.functional.pearson_corrcoef(logits.squeeze(), y.squeeze()))
+        # if self.multi_task:
+        #     self.log("test_pearson", torchmetrics.functional.pearson_corrcoef(logits[:, 0].squeeze(), y[:, 0].squeeze()), prog_bar=True)
+        # else: 
+        self.log("test_pearson", torchmetrics.functional.pearson_corrcoef(logits.squeeze(), y.squeeze()))
 
 
     def configure_optimizers(self):
