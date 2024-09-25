@@ -103,7 +103,7 @@ def main():
         if args.sweep:
             print("Running Sweep")
             sweep_config = {
-                            'method': 'random',
+                            'method': 'bayes',
                             'metric': {'name': 'val_loss', 'goal': 'minimize'},
                             'parameters': {
                                 'training.epochs': {'values': [5, 8, 15, 20]},
