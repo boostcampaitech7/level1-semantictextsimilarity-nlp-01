@@ -135,7 +135,9 @@ def main():
             if col in predict_csv.columns:
                 output[col] = predict_csv[col] # output의 비어있는 행들은 predict_csv의 값으로 채워줌
         output['target'] = predictions
-        output.to_csv('output.csv', index=False)
+        if not os.path.exists('outputs'):
+            os.makedirs('outputs')
+        output.to_csv('outputs/output.csv', index=False)
     else:
         raise ValueError('mode should be either "train" or "inference"')
 
