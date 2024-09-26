@@ -103,11 +103,11 @@ def interactive_ensemble(output_path='outputs', result_file='ensemble.csv'):
         return
     result_df = merged_df.groupby('id').apply(
         lambda x: pd.Series({
-            'target': (x['weighted_target'].sum() / x['weight'].sum()).round(1)
+            'target': round(x['weighted_target'].sum() / x['weight'].sum(), 1)
         })
     ).reset_index()
     
-    result_df.to_csv(os.path.join(folder_path, result_file), index=False)
+    result_df.to_csv(result_file, index=False)
     print(f'현재 디렉토리에 다음 파일이 저장되었습니다: {result_file}')
     
 if __name__ == "__main__":
