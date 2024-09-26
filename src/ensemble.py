@@ -66,6 +66,9 @@ def interactive_ensemble(output_path='outputs', result_file='ensemble.csv'):
         dfs.append(df)
     
     csv_df = pd.concat(dfs)
+    for df in dfs:
+        if set(df['id'].values) != set(dfs[0]['id'].values):
+            raise ValueError("The IDs in the CSV files do not match: " + df['name'].values[0])
     page = 0
     while True:
         print(f"Page {page + 1}")
