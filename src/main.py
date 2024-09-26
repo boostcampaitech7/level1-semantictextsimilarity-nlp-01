@@ -82,6 +82,9 @@ def train(base_config, model_path):
         
         torch.save(model, f"model_{wandb.run.id}.pt")
         
+        # GPU 메모리 비우기
+        torch.cuda.empty_cache()
+        
 
 def main():
     base_config = load_config()
