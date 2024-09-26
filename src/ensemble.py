@@ -4,7 +4,7 @@ import argparse
 
 def auto_ensemble(output_path='outputs', result_file='ensemble.csv'):
     # 폴더 경로 설정 (현재 폴더)
-    folder_path = os.path.dirname(os.path.join(os.getcwd(), output_path))
+    folder_path = os.path.dirname(os.path.join(os.getcwd(), output_path+'/'))
 
     # 모든 csv 파일 불러오기
     csv_files = [f for f in os.listdir(folder_path) if f.endswith('.csv')]
@@ -53,7 +53,7 @@ def auto_ensemble(output_path='outputs', result_file='ensemble.csv'):
     
 def interactive_ensemble(output_path='outputs', result_file='ensemble.csv'):
     # 폴더 경로 설정 (현재 폴더)
-    folder_path = os.path.dirname(os.path.join(os.getcwd(), output_path))
+    folder_path = os.path.dirname(os.path.join(os.getcwd(), output_path+'/'))
 
     # 모든 csv 파일 불러오기
     csv_files = [f for f in os.listdir(folder_path) if f.endswith('.csv')]
@@ -98,6 +98,9 @@ def interactive_ensemble(output_path='outputs', result_file='ensemble.csv'):
     
     merged_df = pd.merge(csv_df, weight_df, left_on='name', right_on='name')
     merged_df['weighted_target'] = merged_df['target'] * merged_df['weight']
+    if merged_df['weight'].sum() == 0:
+        print("가중치가 모두 0입니다. 가중평균을 계산할 수 없습니다.")
+        return
     result_df = merged_df.groupby('id').apply(
         lambda x: pd.Series({
             'target': (x['weighted_target'].sum() / x['weight'].sum()).round(1)
