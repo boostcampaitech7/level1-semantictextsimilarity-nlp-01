@@ -137,7 +137,10 @@ def main():
         dataloader = Dataloader(config)
         
         # 저장된 모델로 예측을 진행
-        model = torch.load(args.model_path)
+        if args.model_path.endswith('.pt'):
+            model = torch.load(args.model_path)
+        elif args.model_path.endswith('.ckpt'):
+            model = Model.load_from_checkpoint(args.model_path)
         trainer = get_trainer(config, "inference")
         predictions = trainer.predict(model=model, datamodule=dataloader)
 
