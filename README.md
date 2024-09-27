@@ -1,4 +1,4 @@
-# NLP 프로젝트
+# NLP 프로젝트 : 문장 유사도(STS : Semantic Text Similaryity)
 ## NLP-01조 아이즈원
 박준성, 이재백, 강신욱, 홍성균, 백승우, 김정석
 
