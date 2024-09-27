@@ -1,5 +1,3 @@
-# NLP 프로젝트 Wrap-up report
-
 **NLP-01조 아이즈원**  
 박준성, 이재백, 강신욱, 홍성균, 백승우, 김정석
 
@@ -7,7 +5,7 @@
 
 | 주제 | 문장 간 유사도 측정 (Semantic Text Similarity, STS) |  |
 | :---: | ----- | :---- |
-| **구현 내용** | **주어진 STS 데이터셋을 활용해 두 문장의 유사도를 0.0\~5.0로 측정하는 AI 모델 구축 피어슨 상관계수(Pearson Correlation Coefficient, PCC)를 평가지표로, 데이터 전처리 및 증강, 하이퍼파라미터 최적화를 수행하여 모델 성능 개선**  |  |
+| **구현 내용** | **주어진 STS 데이터셋을 활용해 두 문장의 유사도를 0.0\~5.0로 측정하는 AI 모델 구축 피어슨 상관계수(Pearson Correlation Coefficient, PCC)를 평가지표로, 데이터 전처리 및 증강, 하이퍼파라미터 최적화를 수행하여 모델 성능 개선**   |
 | **개발 환경** | **서버** | **AI Stages GPU (Tesla V100-SXM2) \* 4EA** |
 |  | **기술 스택** | **Python, Transformers, PyTorch, Pandas, WandB, Hugging Face, Matplotlib** |
 |  | **운영체제** | **Linux** |
