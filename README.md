@@ -3,14 +3,17 @@
 ## NLP-01조 아이즈원
 박준성, 이재백, 강신욱, 홍성균, 백승우, 김정석
 
-## 프로젝트 개요
+## **프로젝트 개요**
+이 프로젝트는 **Semantic Text Similarity (STS)** 태스크를 통해 두 문장의 의미 유사도를 0.0에서 5.0 사이의 값으로 측정하는 AI 모델을 구축하는 것을 목표로 합니다. 
+평가 지표로는 **피어슨 상관계수(Pearson Correlation Coefficient)**를 사용하였으며, 데이터 전처리, 증강, 하이퍼파라미터 최적화를 통해 모델 성능을 개선했습니다.
 
-### 주제
-문장 간 유사도 측정 (Semantic Text Similarity, STS)
-
-### 구현 내용
-- 주어진 STS 데이터셋을 활용해 두 문장의 유사도를 0.0~5.0로 측정하는 AI 모델 구축
-- 피어슨 상관계수(Pearson Correlation Coefficient, PCC)를 평가지표로, 데이터 전처리 및 증강, 하이퍼파라미터 최적화를 수행하여 모델 성능 개선 
+## **팀원**
+- 박준성
+- 이재백
+- 강신욱
+- 홍성균
+- 백승우
+- 김정석
 
 ### 개발 환경
 
@@ -75,6 +78,23 @@
 - **main.py**: PyTorch Lightning과 WandB를 사용하여 모델을 학습 및 로깅하며 검증과 테스트를 수행
 - **streamlit.py**: 데이터 분포 및 토큰 길이 분포를 streamlit 라이브러리를 활용하여 시각화 및 분석 
 - **config.yaml**: 모델 기본 훈련 및 데이터 경로 설정
+
+## **실행 방법**
+1. **레포지토리 클론:**
+   ```bash
+   git clone https://github.com/your-repo-url.git
+   ```
+2. **필요한 패키지 설치:**
+   ```bash
+   pip install -r requirements.txt
+   ```
+3. **설정 파일 수정:**
+   `config.yaml` 파일에서 데이터 경로 및 하이퍼파라미터를 설정합니다.
+
+4. **모델 학습:**
+   ```bash
+   python src/main.py
+   ```
 
 ## 프로젝트 수행 절차 및 방법
 
