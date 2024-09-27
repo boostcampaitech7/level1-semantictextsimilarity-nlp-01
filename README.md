@@ -1,200 +1,89 @@
-**NLP-01조 아이즈원**  
-박준성, 이재백, 강신욱, 홍성균, 백승우, 김정석
 
-- # 프로젝트 개요
+# **NLP Semantic Text Similarity Project (NLP-01 Team)**
 
-| 주제 | 문장 간 유사도 측정 (Semantic Text Similarity, STS) |  |
-| :---: | ----- |
-| **구현 내용** | **주어진 STS 데이터셋을 활용해 두 문장의 유사도를 0.0\~5.0로 측정하는 AI 모델 구축 피어슨 상관계수(Pearson Correlation Coefficient, PCC)를 평가지표로, 데이터 전처리 및 증강, 하이퍼파라미터 최적화를 수행하여 모델 성능 개선**   |
-| **개발 환경** | **서버** | **AI Stages GPU (Tesla V100-SXM2) \* 4EA** |
-|  | **기술 스택** | **Python, Transformers, PyTorch, Pandas, WandB, Hugging Face, Matplotlib** |
-|  | **운영체제** | **Linux** |
-| **협업 도구** | **Github** | **코드 공유 및 버전 관리, Issue로 진행 중인 Task 공유** |
-|  | **Notion** | **회의 내용 공유, 프로젝트 일정 관리, 실험 기록** |
-|  | **Slack** | **Github 및 WandB 봇을 활용한 협업, 의견 공유, 회의** |
-|  | **Zoom** | **실시간 소통을 통한 의견 공유 및 회의** |
+## **Project Overview**
+This project focuses on building an AI model to measure the semantic similarity between two sentences using the **Semantic Text Similarity (STS)** task. The similarity is rated on a scale of 0.0 to 5.0. The primary evaluation metric used is the **Pearson Correlation Coefficient (PCC)**, and efforts have been made to improve model performance through data preprocessing, augmentation, and hyperparameter optimization.
 
-- # 팀 구성 및 역할
+## **Team Members**
+- Park Junsung
+- Lee Jaebaek
+- Kang Shinu
+- Hong Sungkyun
+- Baek Seungwoo
+- Kim Jungseok
 
-| 팀원 | 역할 |
-| :---: | ----- |
-| **augment\_func** |   |
-| 이재백 |   |
-| 강신욱 |   |
-| 홍성균 |   |
-| 백승우 |   |
-| 김정석 |   |
+## **Project Structure**
+```bash
+├── notebooks
+│   └── EDA.ipynb               # Exploratory Data Analysis
+├── src
+│   ├── data_pipeline
+│   │   ├── augment_func
+│   │   │   ├── AugFunction.py  # Abstract class for augmentation functions
+│   │   │   ├── swap_sentences.py  # Function to swap sentence_1 and sentence_2
+│   │   │   ├── undersample_label_0.py  # Undersampling for label 0
+│   │   ├── augmentation.py      # Main module for augmentation execution
+│   │   ├── dataloader.py        # Data loading and tokenization
+│   │   └── dataset.py           # Dataset class for input-output handling
+│   ├── eda
+│   │   ├── exploration.py       # Streamlit-based visualizations
+│   │   └── feature.py           # Adding token length feature
+│   ├── model
+│   │   ├── MultiTaskLoss.py     # Multi-task loss function for regression and classification
+│   │   ├── loss.py              # Custom loss functions
+│   │   ├── model.py             # Model training and validation (PyTorch Lightning)
+│   │   └── optimizer.py         # Custom optimizer management
+│   ├── utils
+│   │   ├── decorators.py        # Metadata decorators
+│   │   ├── config.py            # Load YAML configurations
+│   │   ├── ensemble.py          # Model ensemble logic
+│   └── main.py                  # Model training, validation, and logging (PyTorch Lightning)
+└── config.yaml                  # Default training and dataset configuration
+```
 
-- # 프로젝트 파일 구조
+## **Development Environment**
+- **Server:** AI Stages GPU (Tesla V100-SXM2) x 4
+- **Languages:** Python
+- **Libraries:** Transformers, PyTorch, Pandas, WandB, Hugging Face, Matplotlib
+- **Operating System:** Linux
 
-| notebooks | 코드 셀 단위 확인이 필요한 EDA 결과 또는 임시 코드 작성 |  |  |  |  |  |  |
-| ----- | ----- | ----- | :---- | :---- | ----- | ----- | ----- |
-| src | **data\_pipeline** | **데이터 증강 및 전처리를 포함한 모델에 데이터를 공급하기 위한 소스 코드에 대한 디렉토리** |  |  |  |  |  |
-|  |  | **augment\_func** | **데이터 증강 함수를 객체지향적으로 관리하기 위한 디렉토리** |  |  |  |  |
-|  |  |  | **AugFunction.py** | **데이터 증강 함수를 위한 추상 클래스** |  |  |  |
-|  |  |  | **swap\_sentences.py** | **sentence\_1 column과 sentence\_2 column의 순서를 바꾼 데이터 증강 함수** |  |  |  |
-|  |  |  | **undersample\_label\_0.py** | **라벨이 0인 함수를 언더샘플링하는 데이터 증강 함수** |  |  |  |
-|  |  | **augmentation.py** | **augment\_func 폴더로부터 데이터 증강 함수를 불러와 실행하는 모듈** |  |  |  |  |
-|  |  | **dataloader.py** | **데이터 로딩, 증강, 전처리 및 토큰화를 수행하는 모듈** |  |  |  |  |
-|  |  | **dataset.py** | **데이터셋 클래스를 정의하여 입출력 데이터를 처리하는 모듈** |  |  |  |  |
-|  | **eda** | **데이터 EDA를 위한 시각화 함수 등에 대한 디렉토리**  |  |  |  |  |  |
-|  |  | **exploration.py** | **\- notebooks 처럼 코드 셀 단위 확인이 아닌, stramlit.py 를 통해 구현되는 시각화 코드  exploration.py : 레이블 분포, 토큰 길이, 레이블-타겟  L1 손실 등 구현 feature.py : 주어진 데이터 문장의 토큰 길이 결과를 새로운 열로 추가** |  |  |  |  |
-|  |  | **feature.py** |  |  |  |  |  |
-|  | **model** | **모델 및 모델 훈련 과정에서 사용되는 손실 함수, 옵티마이저 등을 관리하기 위한 디렉토리** |  |  |  |  |  |
-|  |  | **MultiTaskLoss.py** | **label 데이터 회귀 손실과 binary 데이터 이진 분류 손실 결합하여 다중 학습을 지원하는 손실 함수 정의**  |  |  |  |  |
-|  |  | **loss.py** | **주어진 이름에 따라 손실 함수 반환, 미지원 함수 입력 시 예외 발생** |  |  |  |  |
-|  |  | **model.py** | **PyTorch Lightning을 사용하여 학습, 검증, 테스트 단계를 구현** |  |  |  |  |
-|  |  | **optimizer.py** | **PyTorch 최적화 알고리즘 반환, 미지원 알고리즘 입력 시 예외 발생** |  |  |  |  |
-|  | **utils** | **직접 실행하지 않으면서 여러 파일에서 사용될 가능성이 있는 함수들에 대한 디렉토리** |  |  |  |  |  |
-|  |  | **decorators.py** | **메타데이터를 추가하는 데코레이터 정의** |  |  |  |  |
-|  |  | **config.py** | **yaml 파일에서 설정을 로드하여 Python 딕셔너리로 변환** |  |  |  |  |
-|  | **ensemble.py** | **여러 모델의 output의 가중평균 계산** |  |  |  |  |  |
-|  | **main.py** | **PyTorch Lightning과 WandB를 사용하여 모델을 학습 및 로깅하며 검증과 테스트를 수행** |  |  |  |  |  |
-|  | **streamlit.py** | **데이터 분포 및 토큰 길이 분포를 streamlit 라이브러리를 활용하여 시각화 및 분석**  |  |  |  |  |  |
-| **config.yaml** | **모델 기본 훈련 및 데이터 경로 설정** |  |  |  |  |  |  |
+## **How to Run**
+1. **Clone the repository:**
+   ```bash
+   git clone https://github.com/your-repo-url.git
+   ```
+2. **Install the required dependencies:**
+   ```bash
+   pip install -r requirements.txt
+   ```
+3. **Configure settings:**
+   Modify `config.yaml` to set the appropriate file paths and hyperparameters.
 
-- # 프로젝트 수행 절차 및 방법
+4. **Train the model:**
+   ```bash
+   python src/main.py
+   ```
 
-  ## **\<그라운드 룰\>**
+## **Data Augmentation Techniques**
+We employed various augmentation techniques to improve model performance:
+- **Sentence Swapping:** Swapped sentence_1 and sentence_2 in the dataset.
+- **Undersampling:** Reduced the number of label_0 entries to balance the dataset.
+- **Text Normalization:** Simplified repetitive syllables.
+- **Translation Augmentation:** Used Google Translator to translate English to Korean.
 
-1. **팀 Notion에 있는 서버 현황판 활용하기**![][image1]  
-2. **Git 관련**  
-- Github Issue 활용하여 수행 중인 작업 공유하기![][image2]  
-  ![][image3]
+## **Model Evaluation**
+- **Metrics:** Pearson Correlation Coefficient (PCC)
+- **Validation Strategy:** K-fold cross-validation was used to improve generalization.
+- **Ensemble:** Model outputs were ensembled using weighted averages.
 
+## **Results**
+- **Private Leaderboard:** 6th place (PCC: 0.9391)
+- **Public Leaderboard:** 9th place (PCC: 0.9341)
 
-  
+## **Collaborative Tools**
+- **Version Control:** [GitHub](https://github.com/your-repo-url)
+- **Project Management:** Notion
+- **Communication:** Slack, Zoom
 
-
-  \- commit convention 사용
-
-  \- branch naming convention  
-  \`{name}-issue-{issue 번호}\`로 브랜치의 이름을 
-
-정해 브랜치별로 작업 중인 팀원과 작업 내용을 알 수 있도록 하기
-
-3. **소통 관련**  
-- 상호 존중  
-- 한 작업에 복수 인력이 투입될 때 따로 모여서 실시간으로 대화하며 협업하기  
-- 일일 제출 횟수 제한을 감안하여 슬랙/줌에서 회의 후 최종 결과물 제출  
-- 데일리 스크럼/피어 세션 때 남아 있는 PR 처리하기
-
-## **\<전체 프로젝트 수행 과정 및 상세 설명\>**
-
-![][image4]
-
-1. ## **프로젝트 기초 강의 수강**
-
-- 기간 : 09/10 \~ 09/13  
-- 내용 : NLP 프로젝트 관련 기초 강의를 수강하며 프로젝트 적용점 도출  
-  - 기본 LINUX 명령어 이해  
-  - Streamlit을 이용한 빠른 배포 및 데이터 시각화 공유  
-  - huggingface 라이브러리 및 NLP Task(Text Classification, QA, STS, NER 등) 이해 
-
-2. ## **베이스 라인 코드 분석 및 프로젝트 파일 구조 개편**
-
-- 기간 : 09/14 \~ 09/19  
-- 내용 : 기본 제공되는 Pytorch 기반 베이스라인 코드 이해 및 파일 구조 개편  
-  - 기본 제공되는 베이스라인 코드 이해  
-  - 모듈성, 응집도, 결합도를 고려하여 코드 모듈화  
-  - 모듈화된 코드 기반으로 모델 학습 파이프라인을 크게 **data\_pipeline, EDA, model, utils**로 나누고 CLI에서 **main.py**를 실행시킴으로써 학습 진행  
-  - 학습 기본값은 **config.yaml**에 저장하여 argument parser로 입력시키던 하이퍼파라미터의 안정화
-
-
-    \>\>\>\>\>\>\>
-
-    구조 개편
-
-    \>\>\>\>\>\>
-
- 
-
-3. ## **데이터 EDA 및 학습 모델 분석** 
-
-- 기간 : 09/20  
-  내용 : 학습 데이터 분석 후 실제로 여러 **모델**들을 테스트하여 성능 평가  
-- EDA : 라벨 데이터 시각화, 길이에 따른 라벨 분포 확인과 이에 따른 max\_token 지정  
-- 다양한 모델 테스트 : 여러 모델들을 테스트하고, 각 모델의 성능 분석 (주로 bert-base)  
-- 성능 평가 : 실제 예측값과 val\_data 간에 피어슨 상관계수를 통한 모델들의 비교 분석  
-    
-  
-
-### 
-
-4. ## **데이터 전처리 및 증강**
-
-- 기간 : 09/21 \~ 09/23  
-  내용 : 데이터 전처리 및 증강의 실효성 검증 (상승 : 😃 미미 : 😑 하락 :🥺 )  
-- 학습 데이터 sentence\_swap   
-  😃 val\_pearson 소폭 상승 확인  
-- laebl\_0 데이터에 대해 sentence\_1을 sentence\_2로 복사하여 label\_5 데이터로 증강  
-  😑 모델 별로 미미한 변화 또는 아주 작은 val\_pearson의 상승  
-- 데이터 정규화를 통해 반복되는 음절 간소화  
-  😃 val\_pearson 소폭 상승 확인  
-- 영문 데이터에 대하여 GoolgeTranslator 라이브러리를 활용하여 한글로 변환  
-  😃 val\_pearson 소폭 상승 확인  
-- Dataset 모듈에 input\_data로 input\_ids만 들어가는 것을 확인. attention\_mask 또한 input\_data에 추가  
-  😃 val\_pearson 소폭 상승 확인  
-- train, val 데이터를 합친 후 k-fold 방식으로 모델에 학습, 검증 데이터를 입력시켜 일반화 성능 향상
-
-  😑 val\_pearson 상승 없거나 소폭 하락
-
-- mecab() 형태소 분석기를 활용하여 단순 띄어쓰기 외에 형태소 단위로 띄어쓰기를 진행하여 모델에 입력  
-  🥺 val\_pearson 하락 : 형태소 단위의 과한 띄어쓰기의 적용은 모델에 유의미하게 받아들여지지 않음.  
-- 학습에 continuous한 label데이터(0.0 \~5.0) 외에 binary\_label데이터(0 or 1)를 포함시켜 예측시킴
-
-		🥺 val\_pearson 하락 : MultiTask를 수행하게 하는 것은 예측 정확도를 떨어뜨린다고 판단됨.
-
-5. **하이퍼파라미터 튜닝**  
-- 기간 : 09/24
-
-	내용 : WandB 라이브러리를 통한 실험 로깅 및 sweep 옵션을 통해 하이퍼파라미터 튜닝
-
-- main.py 에 wandb.login 및 wandb.init을 추가하여 학습 과정을 로깅할 수 있도록 함.  
-- argument parser로 model\_path와 sweep 옵션을 설정하여 하이퍼파라미터 최적화 실행  
-- wandb sweep의 경우 yaml 파일로 넘기기보다 main.py에서 직접 sweep\_config를 설정할 수 있도록 dictionary를 구현함(기존 config.yaml과의 구별을 위해)
-
-![][image5]  
- 
-
-6. **예측값 EDA를 통한 앙상블 대상 모델 선정**  
-- 기간 : 09/25 \~ 9/26
-
-	내용 : test\_pearson 및 val\_pearson 기반 모델 리스트 업 및 앙상블 결정
-
-- 학습 완료 모델들의 예측값들을 val\_pearson 및 test\_pearson 상관계수를 통해 앙상블의 재료로 리스트업  
-- pearson 상관계수가 예측값들의 선형성을 중요시하는 바, 이에 따라 각 예측값의 상관계수가 서로 0.95 이상인 모델들 위주로 앙상블 진행   
-- 앙상블의 예측값을 시각화하여 실제 어떤 모델들을 넣고 뺄지 혹은 가중치를 얼마나 둘지를 결정하여 최종 제출  
-    
-    
-  
-
-
-1) 학습 완료된 모델들을 노션에 리스트업  
-2) 관련 val\_pearson과 실제 예측 csv파일 업로드  
-3) KR-ELECTRA 모델은 주 모델로써 별도 관리 
-
-1) 실제 앙상블 조합 3가지를 선정  
-2) 성능 기준 (빨 \> 파 \> 노) 노랑이 우세  
-3) 700 기준 좌하방, 우상방이 유효함을 확인  
-4) 이후 앙상블 재료 모델 선정에 반영
-
-# 
-
-- # 프로젝트 결과
-
-| 분류 | 순위 | Pearson |  |
-| :---: | :---: | :---: | ----- |
-| **private(최종 순위)** | **6** | **0.9391** |  |
-| **public(중간 순위)** | **9** | **0.9341** |  |
-
-- **최종 순위 상승 이유 분석 :**   
-  **1\. 최종 앙상블 모델 선정에 있어서 과적합을 낮추기 위해 최대한 base가 다른 모델들을 선택해 반영함.**  
-  **2\. 앙상블 과정에서 가중치를 조정함에 있어 test 데이터셋에 대한 과적합을 낮추기 위해 \-0.3 \~ 0.3 단위로만 진행한 것이 유효했다고 판단됨.**
-
-# 자체 평가
-
-1. **잘한 점**  
-1) **협업 : Slack, Notion, GitHub**  
-2)   
-2. **아쉬운 점**
+## **Acknowledgments**
+We would like to thank our team for their hard work and collaboration throughout the project.
