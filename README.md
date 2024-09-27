@@ -81,7 +81,8 @@
 
 4. **모델 학습:**
    ```bash
-   python src/main.py
+   python src/main.py --mode=train # config.yaml에 따른 학습
+   python src/main.py --mode=train --sweep=True # main.py 내에 sweep_config에 따른 학습
    ```
 
 ## 프로젝트 수행 절차 및 방법
