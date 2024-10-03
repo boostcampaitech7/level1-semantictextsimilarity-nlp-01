@@ -23,12 +23,12 @@
 
 | 팀원 | 역할 |
 |------|------|
-| 박준성 |  |
-| 이재백 |  |
-| 강신욱 |  |
-| 홍성균 |  |
-| 백승우 |  |
-| 김정석 |  |
+| 박준성 |베이스라인 코드정리, 협업 방법 및 브랜치 네이밍 컨벤션 제안, 깃허브 PR 템플릿 제작, 모델 조사 및 실험, 데이터 증강 방법 제안(K-TACC), 데이터 전처리(english_normalization) 및 증강(swap_sentence) 방법 유지보수, 모델 아키텍처 변경 실험(label과 binary_label을 동시에 예측), 데이터 EDA(dev.csv에 대한 모델의 예측과 실제 label 값 비교 시각화, 훈련 데이터셋 label별 분포, token 개수 분포), 앙상블 코드 유지보수  |
+| 이재백 |모델 조사 및 실험. 데이터 EDA(label 값 분포 확인, token length 확인), 데이터 증강 구현 및 실험(swap sentence, back translation), 데이터 전처리 구현 및 실험(반복되는 문자열 압축, 영단어 번역), 앙상블(앙상블 코드 구현)  |
+| 강신욱 |데이터 증강 방법 제안(단어 안의 랜덤한 위치에 공백 추가), 모델 조사 및 실험, 데이터 EDA(라벨 값 분포 확인)  |
+| 홍성균 |데이터 EDA(모델 예측값에 따른 분포 분석 및 시각화), 데이터 증강(mecab과 같은 형태소 분석기를 활용한 조사 변경), 모델실험구현(WandB logging, WandB sweep으로 실험분석 및 하이퍼 파라미터 조정,  argument parser에 모델 재학습 옵션 추가), 코드 리팩토링(정규화 전처리 부분 병렬처리로 속도 향상 및 sweep 옵션, argument parser 버그 픽스 등).   |
+| 백승우 |데이터 EDA(label 분포 분석), 데이터 전처리(불용어 제거), 데이터 증강(under sampling, copied sentence), 모델 아키텍쳐 변경 실험(embedding layer freezing, 일부 encoder layer freezing), 모델 조사 및 실험  |
+| 김정석 |데이터 분석 및 전처리 고도화, 모델 아키텍처 최적화, 앙상블 기법 개선  |
 
 ## 2. 프로젝트 파일 구조
 ```bash
