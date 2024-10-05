@@ -1,0 +1,33 @@
+model:
+  name: snunlp/KR-ELECTRA-discriminator
+  multi_tasks: False # True라면 binary_label을 함께 예측하며 학습
+
+seed: 42
+
+training:
+  epochs: 20
+  batch_size: 32
+  learning_rate: 0.00001
+  optimizer: AdamW
+  loss: L1loss
+  shuffle: True
+  weight_decay: 0.01 # Not Implemented
+  scheduler: CosineAnnealingLR # Not Implemented
+
+data:
+  dropout_rate: 0.1
+  max_tokens: 160
+  augmentation:
+    - method: swap_sentences # 원본 데이터에 text_column을 뒤바꾸어 데이터를 증강 
+      params:
+        probability: 1.0
+    - method: undersample_label_0 # 원본 데이터에서 label이 0인 데이터를 제거하고
+                                  # 제거한 데이터는 label이 5.0인 데이터로 증강하여 추가 
+      params:
+        probability: 0
+
+path:
+  train: data/train.csv
+  dev: data/dev.csv
+  test: data/dev.csv
+  predict: data/test.csv
