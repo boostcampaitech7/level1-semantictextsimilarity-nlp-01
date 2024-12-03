@@ -1,4 +1,4 @@
-# NLP 프로젝트 : Semantic Text Similaryity
+# NLP 프로젝트 : Semantic Text Similarity
 
 ## 1. **프로젝트 개요**
 이 프로젝트는 **Semantic Text Similarity (STS)** 태스크를 통해 두 문장의 의미 유사도를 0.0에서 5.0 사이의 값으로 측정하는 AI 모델을 구축하는 것을 목표로 합니다. 
